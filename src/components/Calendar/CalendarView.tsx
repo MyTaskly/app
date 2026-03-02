@@ -467,26 +467,6 @@ const CalendarView: React.FC = () => {
             <Text style={styles.selectedDateTitle}>
               Impegni del {dayjs(selectedDate).format('DD MMMM YYYY')}
             </Text>
-            {syncStatus && (
-              <View style={styles.syncIndicator}>
-                {syncStatus.isSyncing ? (
-                  <View style={styles.syncingContainer}>
-                    <ActivityIndicator size="small" color="#666666" />
-                    <Text style={styles.syncText}>Sync...</Text>
-                  </View>
-                ) : !syncStatus.isOnline ? (
-                  <View style={styles.offlineContainer}>
-                    <Ionicons name="cloud-offline-outline" size={16} color="#ff6b6b" />
-                    <Text style={styles.offlineText}>Offline</Text>
-                  </View>
-                ) : syncStatus.pendingChanges > 0 ? (
-                  <View style={styles.pendingContainer}>
-                    <Ionicons name="sync-outline" size={16} color="#ffa726" />
-                    <Text style={styles.pendingText}>{syncStatus.pendingChanges}</Text>
-                  </View>
-                ) : null}
-              </View>
-            )}
           </View>
           <AddTaskButton onPress={handleAddTask} screenWidth={screenWidth} />
         </View>
