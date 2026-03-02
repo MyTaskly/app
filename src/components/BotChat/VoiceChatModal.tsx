@@ -10,10 +10,11 @@ import {
   StatusBar,
   Alert,
   Platform,
+  ScrollView,
 } from "react-native";
 import Svg, { Path, Defs, RadialGradient, Stop } from "react-native-svg";
 import { Ionicons } from "@expo/vector-icons";
-import { useVoiceChat } from '../../hooks/useVoiceChat';
+import { useVoiceChat, ActiveTool } from '../../hooks/useVoiceChat';
 
 
 export interface VoiceChatModalProps {
@@ -412,11 +413,46 @@ const VoiceChatModal: React.FC<VoiceChatModalProps> = ({
             {getStateLabel()}
           </Animated.Text>
 
-          {/* Tool attivi (se presente) */}
+          {/* Tool calls (se presenti) */}
           {activeTools && activeTools.length > 0 && (
-            <Animated.View style={[styles.toolsBadge, { opacity: stateTextOpacity }]}>
-              <Ionicons name="construct-outline" size={13} color="#666666" />
-              <Text style={styles.toolsText}>{activeTools.join(', ')}</Text>
+            <Animated.View style={[styles.toolsContainer, { opacity: stateTextOpacity }]}>
+              <ScrollView
+                style={styles.toolsScroll}
+                contentContainerStyle={styles.toolsScrollContent}
+                showsVerticalScrollIndicator={false}
+                nestedScrollEnabled
+              >
+                {activeTools.map((tool: ActiveTool, idx: number) => (
+                  <View key={`${tool.name}-${idx}`} style={styles.toolRow}>
+                    {/* Icona stato */}
+                    <View style={styles.toolIconCol}>
+                      {tool.status === 'running' ? (
+                        <Ionicons name="time-outline" size={14} color="#FF9500" />
+                      ) : (
+                        <Ionicons name="checkmark-circle-outline" size={14} color="#34C759" />
+                      )}
+                    </View>
+
+                    <View style={styles.toolContent}>
+                      {/* Nome funzione */}
+                      <Text style={styles.toolName}>{tool.name}</Text>
+                    </View>
+
+                    {/* Badge stato */}
+                    <View style={[
+                      styles.toolStatusBadge,
+                      tool.status === 'running' ? styles.toolStatusRunning : styles.toolStatusComplete,
+                    ]}>
+                      <Text style={[
+                        styles.toolStatusText,
+                        tool.status === 'running' ? styles.toolStatusTextRunning : styles.toolStatusTextComplete,
+                      ]}>
+                        {tool.status === 'running' ? 'in corso' : 'fatto'}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
             </Animated.View>
           )}
 
@@ -564,6 +600,78 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#666666",
     fontWeight: "400",
+  },
+  // Tool calls list
+  toolsContainer: {
+    marginTop: 12,
+    width: "100%",
+    maxHeight: 180,
+    borderRadius: 14,
+    backgroundColor: "#F2F2F7",
+    overflow: "hidden",
+  },
+  toolsScroll: {
+    maxHeight: 180,
+  },
+  toolsScrollContent: {
+    padding: 10,
+    gap: 8,
+  },
+  toolRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    padding: 10,
+    gap: 8,
+  },
+  toolIconCol: {
+    marginTop: 1,
+    width: 16,
+    alignItems: "center",
+  },
+  toolContent: {
+    flex: 1,
+    gap: 3,
+  },
+  toolName: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#1C1C1E",
+    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+  },
+  toolArgs: {
+    fontSize: 11,
+    color: "#6E6E73",
+    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+  },
+  toolOutput: {
+    fontSize: 11,
+    color: "#34C759",
+    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+  },
+  toolStatusBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+    marginTop: 1,
+  },
+  toolStatusRunning: {
+    backgroundColor: "rgba(255, 149, 0, 0.12)",
+  },
+  toolStatusComplete: {
+    backgroundColor: "rgba(52, 199, 89, 0.12)",
+  },
+  toolStatusText: {
+    fontSize: 10,
+    fontWeight: "600",
+  },
+  toolStatusTextRunning: {
+    color: "#FF9500",
+  },
+  toolStatusTextComplete: {
+    color: "#34C759",
   },
   errorText: {
     marginTop: 12,
