@@ -192,7 +192,7 @@ export function useVoiceChat() {
 
         case 'speech_stopped':
           // VAD OpenAI: utente ha smesso di parlare — il mic resta acceso,
-          // il server gate blocca i frame finché OpenAI non è pronto ad ascoltare
+          // OpenAI processa il turno e risponde in autonomia
           setState('processing');
           break;
 
@@ -233,7 +233,6 @@ export function useVoiceChat() {
           // Ferma solo la riproduzione audio, il mic resta acceso
           if (audioPlayerRef.current) {
             await audioPlayerRef.current.stopPlayback();
-            audioPlayerRef.current.clearChunks();
           }
           setState('ready');
           break;
@@ -384,8 +383,8 @@ export function useVoiceChat() {
 
     try {
       // Callback invocato per ogni chunk audio PCM16 a 24kHz.
-      // Il mic rimane sempre acceso: è il server gate in voice_bridge.py
-      // a bloccare i frame durante l'elaborazione dell'agente.
+      // Il mic rimane sempre acceso: è il VAD server-side di OpenAI
+      // a gestire i turni e le interruzioni automaticamente.
       const onChunk = (base64Chunk: string) => {
         try {
           const arrayBuffer = base64ToArrayBuffer(base64Chunk);
