@@ -5,13 +5,13 @@ import {
   Image,
   Modal,
   StyleSheet,
-  Dimensions,
   FlatList,
   Pressable,
   Animated,
   NativeSyntheticEvent,
   NativeScrollEvent,
   Platform,
+  useWindowDimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -23,7 +23,6 @@ import {
   TutorialStepDefinition,
 } from '../../constants/tutorialContent';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Total pages = welcome + steps + completion
 type PageType = 'welcome' | 'step' | 'section-header' | 'completion';
@@ -89,6 +88,7 @@ export const TutorialOnboarding: React.FC<{
   onSkip: () => void;
 }> = ({ visible, onComplete, onSkip }) => {
   const { t } = useTranslation();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const flatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -103,10 +103,10 @@ export const TutorialOnboarding: React.FC<{
 
   const onMomentumScrollEnd = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const index = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+      const index = Math.round(e.nativeEvent.contentOffset.x / screenWidth);
       setCurrentIndex(index);
     },
-    []
+    [screenWidth]
   );
 
   const goToPage = useCallback(
@@ -154,7 +154,7 @@ export const TutorialOnboarding: React.FC<{
   }, [goToPage]);
 
   const renderWelcomePage = () => (
-    <View style={styles.pageContainer}>
+    <View style={[styles.pageContainer, { width: screenWidth, height: screenHeight }]}>
       <View style={styles.welcomeCard}>
         <Image
           source={require('../../../assets/icons/adaptive-icon.png')}
@@ -194,7 +194,7 @@ export const TutorialOnboarding: React.FC<{
   const renderSectionHeader = (page: PageData) => {
     const sectionDef = TUTORIAL_SECTION_DEFINITIONS.find(s => s.key === page.sectionKey);
     return (
-      <View style={styles.pageContainer}>
+      <View style={[styles.pageContainer, { width: screenWidth, height: screenHeight }]}>
         <View style={styles.sectionHeaderCard}>
           <View style={styles.sectionIconContainer}>
             <Ionicons
@@ -221,7 +221,7 @@ export const TutorialOnboarding: React.FC<{
     const sectionDef = TUTORIAL_SECTION_DEFINITIONS.find(s => s.key === page.sectionKey);
 
     return (
-      <View style={styles.pageContainer}>
+      <View style={[styles.pageContainer, { width: screenWidth, height: screenHeight }]}>
         <View style={styles.stepContent}>
           {/* Section badge */}
           <View style={styles.sectionBadge}>
@@ -236,7 +236,7 @@ export const TutorialOnboarding: React.FC<{
           </View>
 
           {/* Screenshot image */}
-          <View style={styles.imageContainer}>
+          <View style={[styles.imageContainer, { width: screenWidth - 64, height: screenHeight * 0.42 }]}>
             <Image
               source={stepDef.image}
               style={styles.stepImage}
@@ -253,7 +253,7 @@ export const TutorialOnboarding: React.FC<{
   };
 
   const renderCompletionPage = () => (
-    <View style={styles.pageContainer}>
+    <View style={[styles.pageContainer, { width: screenWidth, height: screenHeight }]}>
       <View style={styles.completionCard}>
         <View style={styles.completionIconContainer}>
           <Ionicons name="checkmark" size={48} color="#FFFFFF" />
@@ -347,8 +347,8 @@ export const TutorialOnboarding: React.FC<{
           onMomentumScrollEnd={onMomentumScrollEnd}
           scrollEventThrottle={16}
           getItemLayout={(_, index) => ({
-            length: SCREEN_WIDTH,
-            offset: SCREEN_WIDTH * index,
+            length: screenWidth,
+            offset: screenWidth * index,
             index,
           })}
         />
@@ -435,10 +435,8 @@ const styles = StyleSheet.create({
     color: '#999',
   },
 
-  // Page container (each page)
+  // Page container (each page) — width/height injected as inline style per render
   pageContainer: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
@@ -524,9 +522,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000',
   },
+  // width/height injected as inline style per render
   imageContainer: {
-    width: SCREEN_WIDTH - 64,
-    height: SCREEN_HEIGHT * 0.42,
     backgroundColor: '#F8F8F8',
     borderRadius: 16,
     overflow: 'hidden',
