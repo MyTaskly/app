@@ -31,7 +31,8 @@
       "notificationDebug": "Notification Debug",
       "bugReport": "Bug Report",
       "notFound": "Page not found",
-      "notificationSettings": "Notification Settings"
+      "notificationSettings": "Notification Settings",
+      "memorySettings": "Memory Settings"
     }
   },
   "settings": {
@@ -53,7 +54,8 @@
       "about": "About",
       "tutorial": "Review Tutorial",
       "testNotifications": "Test Notifications (10s)",
-      "notificationSettings": "Notifications"
+      "notificationSettings": "Notifications",
+      "memorySettings": "Chatbot Memory"
     },
     "tutorial": {
       "restartTitle": "Tutorial",
@@ -871,6 +873,44 @@
       "skip": "Skip",
       "next": "Next",
       "getStarted": "Get Started"
+    }
+  },
+  "memorySettings": {
+    "loading": "Loading memories...",
+    "enableMemory": "Enable chatbot memory",
+    "addMemory": "Add a memory",
+    "empty": "No memories saved yet.",
+    "sections": {
+      "toggle": "Memory",
+      "toggleDesc": "When enabled, the chatbot remembers your preferences and past interactions to personalise responses.",
+      "list": "Manage your memory",
+      "listDesc": "These are the facts the chatbot has learned about you. You can edit or delete any of them.",
+      "info": "Information"
+    },
+    "deleteConfirm": {
+      "title": "Delete memory",
+      "message": "Are you sure you want to delete this memory? This action cannot be undone."
+    },
+    "deleteAll": {
+      "title": "Delete all memories",
+      "message": "All saved memories will be permanently deleted. This action cannot be undone.",
+      "confirm": "Delete all",
+      "link": "Delete all memories"
+    },
+    "modal": {
+      "addTitle": "Add a memory",
+      "editTitle": "Edit memory",
+      "placeholder": "e.g. I prefer tasks with an early morning notification."
+    },
+    "info": {
+      "autoMemory": "Memories are also created automatically during conversations with the chatbot.",
+      "gdpr": "Deleting all memories is irreversible and compliant with GDPR."
+    },
+    "errors": {
+      "loadFailed": "Unable to load memories. Please try again.",
+      "saveFailed": "Unable to save the memory. Please try again.",
+      "deleteFailed": "Unable to delete the memory. Check the ID and try again.",
+      "deleteAllFailed": "Unable to delete all memories. Please try again."
     }
   }
 }

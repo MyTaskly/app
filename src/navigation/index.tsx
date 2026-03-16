@@ -35,6 +35,7 @@ import LanguageScreen from "./screens/Language";
 import VoiceSettingsScreen from "./screens/VoiceSettings";
 import GoogleCalendarScreen from "./screens/GoogleCalendar";
 import NotificationSettingsScreen from "./screens/NotificationSettings";
+import MemorySettingsScreen from "./screens/MemorySettings";
 import CalendarScreen from "./screens/Calendar";
 import NotificationDebugScreen from "./screens/NotificationDebug";
 import BugReportScreen from "./screens/BugReport";
@@ -79,6 +80,7 @@ export type RootStackParamList = {
   Updates: undefined;
   NotFound: undefined;
   NotificationSettings: undefined;
+  MemorySettings: undefined;
 };
 
 // Definizione del tipo per le route dei Tab
@@ -468,6 +470,11 @@ function AppStack() {
           name="BugReport"
           component={BugReportScreen}
           options={{ title: t('navigation.screens.bugReport') }}
+        />
+        <Stack.Screen
+          name="MemorySettings"
+          component={MemorySettingsScreen}
+          options={{ title: t('navigation.screens.memorySettings') }}
         />
         <Stack.Screen name="NotFound" component={NotFoundScreen} />
       </Stack.Navigator>

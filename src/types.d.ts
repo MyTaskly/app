@@ -38,6 +38,7 @@ export type RootStackParamList = {
   GoogleCalendar: undefined;
   NotificationDebug: undefined;
   NotificationSettings: undefined;
+  MemorySettings: undefined;
   Statistics: undefined;
   Updates: undefined;
   NotFound: undefined;

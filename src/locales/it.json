@@ -31,7 +31,8 @@
       "notificationDebug": "Debug Notifiche",
       "bugReport": "Segnala Bug",
       "notFound": "Pagina non trovata",
-      "notificationSettings": "Impostazioni Notifiche"
+      "notificationSettings": "Impostazioni Notifiche",
+      "memorySettings": "Impostazioni Memoria"
     }
   },
   "settings": {
@@ -53,7 +54,8 @@
       "about": "Info",
       "tutorial": "Rivedi Tutorial",
       "testNotifications": "Test Notifiche (10s)",
-      "notificationSettings": "Notifiche"
+      "notificationSettings": "Notifiche",
+      "memorySettings": "Memoria Chatbot"
     },
     "tutorial": {
       "restartTitle": "Tutorial",
@@ -870,6 +872,44 @@
       "skip": "Salta",
       "next": "Avanti",
       "getStarted": "Inizia"
+    }
+  },
+  "memorySettings": {
+    "loading": "Caricamento memorie...",
+    "enableMemory": "Abilita memoria chatbot",
+    "addMemory": "Aggiungi una memoria",
+    "empty": "Nessuna memoria salvata.",
+    "sections": {
+      "toggle": "Memoria",
+      "toggleDesc": "Quando abilitata, il chatbot ricorda le tue preferenze e le interazioni passate per personalizzare le risposte.",
+      "list": "Gestisci la tua memoria",
+      "listDesc": "Questi sono i fatti che il chatbot ha imparato su di te. Puoi modificarli o eliminarli.",
+      "info": "Informazioni"
+    },
+    "deleteConfirm": {
+      "title": "Elimina memoria",
+      "message": "Sei sicuro di voler eliminare questa memoria? L'operazione non può essere annullata."
+    },
+    "deleteAll": {
+      "title": "Elimina tutte le memorie",
+      "message": "Tutte le memorie salvate verranno eliminate definitivamente. L'operazione non può essere annullata.",
+      "confirm": "Elimina tutto",
+      "link": "Elimina tutta la memoria"
+    },
+    "modal": {
+      "addTitle": "Aggiungi una memoria",
+      "editTitle": "Modifica memoria",
+      "placeholder": "es. Preferisco ricevere notifiche la mattina presto."
+    },
+    "info": {
+      "autoMemory": "Le memorie vengono create automaticamente anche durante le conversazioni con il chatbot.",
+      "gdpr": "L'eliminazione di tutte le memorie è irreversibile e conforme al GDPR."
+    },
+    "errors": {
+      "loadFailed": "Impossibile caricare le memorie. Riprova più tardi.",
+      "saveFailed": "Impossibile salvare la memoria. Riprova più tardi.",
+      "deleteFailed": "Impossibile eliminare la memoria. Verifica l'ID e riprova.",
+      "deleteAllFailed": "Impossibile eliminare tutte le memorie. Riprova più tardi."
     }
   }
 }
