@@ -74,7 +74,8 @@
       ],
       "expo-dev-client",
       "expo-router",
-      "expo-audio"
+      "expo-audio",
+      "./plugins/force-browser-version"
     ],
     "extra": {
       "eas": {
