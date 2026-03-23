@@ -7,7 +7,6 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { NotesProvider, useNotesActions, useNotesState } from '../../context/NotesContext';
 import { NotesCanvas } from '../../components/Notes/NotesCanvas';
@@ -70,13 +69,11 @@ const NotesContent: React.FC = () => {
 
 export default function Notes() {
   return (
-    <GestureHandlerRootView style={styles.root}>
-      <SafeAreaView style={styles.root}>
-        <NotesProvider>
-          <NotesContent />
-        </NotesProvider>
-      </SafeAreaView>
-    </GestureHandlerRootView>
+    <SafeAreaView style={styles.root}>
+      <NotesProvider>
+        <NotesContent />
+      </NotesProvider>
+    </SafeAreaView>
   );
 }
 

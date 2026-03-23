@@ -1,7 +1,7 @@
 import { Dimensions } from 'react-native';
 
-// Canvas constants - must match NotesCanvas (GRID_POINTS=50, GRID_SIZE=60)
-export const CANVAS_SIZE = 50 * 60; // 3000px
+// Canvas constants - must match NotesCanvas (GRID_POINTS=40, GRID_SIZE=40)
+export const CANVAS_SIZE = 40 * 40; // 1600px (optimized for all resolutions)
 
 const { width, height } = Dimensions.get('window');
 const initCenterOffset = (CANVAS_SIZE - width) / 2;

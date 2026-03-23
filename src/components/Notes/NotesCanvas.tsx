@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -13,7 +13,6 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
 } from 'react-native-reanimated';
-import Svg, { Defs, Pattern, Rect, Circle } from 'react-native-svg';
 import { useNotesState } from '../../context/NotesContext';
 import { StickyNote } from './StickyNote';
 import { canvasViewport } from '../../utils/canvasViewport';
@@ -25,11 +24,10 @@ export const NotesFocusContext = React.createContext<{
   clearAllFocus: () => {},
 });
 
-
-
-const GRID_POINTS = 50;
-const GRID_SIZE = 60;
-const CANVAS_SIZE = GRID_POINTS * GRID_SIZE; // 50 * 30 = 1500px
+// Ridotto per evitare memory leak su schermi ad alta risoluzione
+const GRID_POINTS = 40;
+const GRID_SIZE = 40;
+const CANVAS_SIZE = GRID_POINTS * GRID_SIZE; // 40 * 40 = 1600px (down from 3000)
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2.5;
 
@@ -161,35 +159,16 @@ export const NotesCanvas: React.FC = () => {
     ] as const,
   }));
 
-  const GridBackground: React.FC = () => (
-    <Svg
-      width={CANVAS_SIZE}
-      height={CANVAS_SIZE}
-      style={StyleSheet.absoluteFillObject}
-    >
-      <Defs>
-        <Pattern
-          id="grid"
-          patternUnits="userSpaceOnUse"
-          width={GRID_SIZE}
-          height={GRID_SIZE}
-        >
-          <Circle
-            cx={GRID_SIZE / 2}
-            cy={GRID_SIZE / 2}
-            r={1.5}
-            fill="#8b8585ff"
-            opacity={0.8}
-          />
-        </Pattern>
-      </Defs>
-      <Rect
-        width="100%"
-        height="100%"
-        fill="url(#grid)"
+  // Sostituito SVG con background nativo - molto più efficiente su schermi ad alta risoluzione
+  const GridBackground: React.FC = useMemo(() => {
+    return () => (
+      <View
+        style={[StyleSheet.absoluteFillObject, {
+          backgroundColor: '#f9f9f9',
+        }]}
       />
-    </Svg>
-  );
+    );
+  }, []);
 
   const LoadingOverlay: React.FC = () => (
     <View style={styles.loadingOverlay}>
@@ -202,14 +181,14 @@ export const NotesCanvas: React.FC = () => {
 
   if (isLoading && notes.length === 0) {
     return (
-      <GestureHandlerRootView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.canvas}>
           <Animated.View style={[styles.canvasContent, canvasAnimatedStyle]}>
             <GridBackground />
           </Animated.View>
           <LoadingOverlay />
         </View>
-      </GestureHandlerRootView>
+      </View>
     );
   }
 
@@ -220,7 +199,6 @@ export const NotesCanvas: React.FC = () => {
           <GridBackground />
           
           {notes.map((note) => {
-            console.log('Rendering note:', note.id, note.position);
             return (
               <StickyNote
                 key={note.id}

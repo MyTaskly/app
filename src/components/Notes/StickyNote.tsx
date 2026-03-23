@@ -47,7 +47,7 @@ export interface StickyNoteRef {
   clearFocus: () => void;
 }
 
-export const StickyNote: React.FC<StickyNoteProps> = ({ note, canvasScale }) => {
+export const StickyNote: React.FC<StickyNoteProps> = React.memo(({ note, canvasScale }) => {
   const { updateNote, deleteNote, updateNotePosition } = useNotesActions();
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(note.text);
@@ -298,7 +298,17 @@ export const StickyNote: React.FC<StickyNoteProps> = ({ note, canvasScale }) => 
       </Modal>
     </>
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison - re-render only if note data or canvasScale reference changes
+  return (
+    prevProps.note.id === nextProps.note.id &&
+    prevProps.note.text === nextProps.note.text &&
+    prevProps.note.color === nextProps.note.color &&
+    prevProps.note.position?.x === nextProps.note.position?.x &&
+    prevProps.note.position?.y === nextProps.note.position?.y &&
+    prevProps.canvasScale === nextProps.canvasScale
+  );
+});
 
 const styles = StyleSheet.create({
   container: {
