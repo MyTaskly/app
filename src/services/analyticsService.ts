@@ -83,15 +83,16 @@ let initPromise: Promise<void> | null = null;
  * Inizializza Vexo. Deve essere chiamato UNA SOLA VOLTA all'avvio dell'app,
  * prima del rendering del NavigationContainer.
  */
-export function initAnalytics(): void {
+export function initAnalytics(): Promise<void> {
   if (IS_DEV) {
     console.log('[ANALYTICS] Dev mode — tracking disabilitato');
-    return;
+    return Promise.resolve();
   }
-  if (initPromise) return;
+  if (initPromise) return initPromise;
   initPromise = Promise.resolve(vexo(VEXO_API_KEY))
     .then(() => { console.log('[ANALYTICS] Vexo inizializzato'); })
     .catch((e) => { console.warn('[ANALYTICS] Errore inizializzazione Vexo:', e); });
+  return initPromise;
 }
 
 // ─────────────────────────────────────────────────────────────

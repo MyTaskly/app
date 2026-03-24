@@ -514,14 +514,15 @@ function AppStack() {
 
 // Componente principale Navigation
 export default function Navigation() {
-  // ── Analytics: inizializza Vexo una sola volta ──
+  // ── Analytics: inizializza Vexo e traccia sessione ──
   useEffect(() => {
-    initAnalytics();
+    initAnalytics().then(() => {
+      trackSessionStart();
+    });
   }, []);
 
   // ── Analytics: traccia sessione via AppState ──
   useEffect(() => {
-    trackSessionStart();
 
     const subscription = AppState.addEventListener("change", (nextState) => {
       if (nextState === "active") {
