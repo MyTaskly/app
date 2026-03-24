@@ -151,30 +151,53 @@ MyTaskly is built with modern React Native architecture:
 MyTaskly-app/
 ├── src/
 │   ├── components/         # Reusable UI components
-│   ├── navigation/         # Navigation structure and screens
-│   │   └── screens/        # Main app screens
-│   ├── services/           # API clients and business logic
-│   ├── contexts/           # React Context providers
-│   ├── constants/          # App constants and configurations
-│   └── utils/              # Helper functions and utilities
+│   │   └── Tutorial/       # Interactive onboarding tutorial system
+│   ├── navigation/         # Navigation structure
+│   │   └── screens/        # Main app screens (Home, TaskList, BotChat, etc.)
+│   ├── services/           # Business logic and API integration
+│   ├── contexts/           # React Context providers for global state
+│   ├── hooks/              # Custom React hooks
+│   ├── utils/              # Helper functions (animations, audio, events)
+│   └── constants/          # App configuration and constants
 ├── assets/                 # Images, fonts, and other static assets
 ├── app.json                # Expo configuration
 ├── package.json            # Project dependencies
 └── tsconfig.json           # TypeScript configuration
 ```
 
+### Core Architecture Layers
+
+| Layer | Service | Responsibility |
+|-------|---------|----------------|
+| **Auth** | `authService.ts` | JWT token management, auto-refresh, Google Sign-In |
+| **Data Sync** | `SyncManager.ts` | Offline queue, exponential backoff retry, event-driven sync |
+| **Caching** | `TaskCacheService.ts` | In-memory + AsyncStorage dual-layer caching |
+| **Tasks** | `taskService.ts` | CRUD with optimistic updates, category filtering |
+| **AI Chat** | `botservice.ts` | SSE streaming responses, WebSocket voice interactions |
+| **Notifications** | `notificationService.ts` | Expo push notifications, task reminders |
+| **Calendar** | `googleCalendarService.ts` | Google Calendar sync and event management |
+
+### Key Patterns
+
+- **Singleton services** — `SyncManager`, `TaskCacheService`, `NetworkService`
+- **Optimistic updates** — UI updates immediately, reverts on API failure
+- **Event-driven communication** — custom `eventEmitter.ts` for cross-module updates (no prop drilling)
+- **Offline-first** — operations queue locally and sync automatically on reconnect
+- **Lazy initialization** — services initialize on first use to avoid circular dependencies
+
 ### Key Technologies
 
 - **Frontend**: React Native 0.79, TypeScript
-- **Navigation**: React Navigation 7
-- **State Management**: React Context API + Async Storage
+- **Navigation**: React Navigation 7 + Expo Router
+- **State Management**: React Context API + AsyncStorage
 - **UI Components**: Custom components with React Native Reanimated
-- **AI Integration**: Custom streaming LLM client
-- **Audio**: Expo AV with custom Voice Activity Detection
-- **Authentication**: Google Sign-In (@react-native-google-signin)
+- **AI Integration**: Custom SSE streaming LLM client
+- **Audio**: Expo AV with custom Voice Activity Detection (VAD)
+- **Authentication**: Google Sign-In (`@react-native-google-signin`)
 - **Notifications**: Expo Notifications
-- **Calendar**: React Native Calendar + Google Calendar API
-- **Data Sync**: Custom sync manager with offline support
+- **Calendar**: Custom Calendar 2.0 component + Google Calendar API
+- **HTTP Client**: Axios with interceptors for auth and error handling
+- **Data Sync**: Custom SyncManager with offline queue support
 - **Build Tool**: Expo EAS Build
 
 ---
