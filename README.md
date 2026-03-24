@@ -57,12 +57,12 @@ Whether you're a student juggling deadlines, a professional managing projects, o
 
 | AI Assistant | Task Management | Voice Chat |
 |:---:|:---:|:---:|
-| ![AI Assistant](./assets/readme/Chat%20testuale.png) | ![Task List](./assets/readme/Lista%20Task.png) | ![AI Chat](./assets/readme/Assistente%20vocale.png) |
+| <img src="./assets/readme/Chat%20testuale.png" width="220" style="border-radius:16px"/> | <img src="./assets/readme/Lista%20Task.png" width="220" style="border-radius:16px"/> | <img src="./assets/readme/Assistente%20vocale.png" width="220" style="border-radius:16px"/> |
 | **Smart Conversations** | **Powerful Organization** | **Voice Commands** |
 
 | Calendar View | Category Management | Telegram Bot |
 |:---:|:---:|:---:|
-| ![Calendar](./assets/readme/Calendario.png) | ![Categories](./assets/readme/Categorie.png) | ![Telegram bot](./assets/readme/Telegram.png) |
+| <img src="./assets/readme/Calendario.png" width="220" style="border-radius:16px"/> | <img src="./assets/readme/Categorie.png" width="220" style="border-radius:16px"/> | <img src="./assets/readme/Telegram.png" width="220" style="border-radius:16px"/> |
 | **Visual Planning** | **Flexible Sharing** | **Full Control** |
 
 ---
