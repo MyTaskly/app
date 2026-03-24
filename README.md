@@ -13,7 +13,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![GitHub Stars](https://img.shields.io/github/stars/Gabry848/MyTaskly-app.svg?style=social)](https://github.com/Gabry848/MyTaskly-app)
 
-[Quick Start](#quick-start-5-minutes) • [Features](#features) • [Screenshots](#screenshots) • [Docs](./docs) • [Contributing](#contributing) • [License](LICENSE.md)
+[Website](https://mytasklyapp.com) • [Download](#-download) • [Features](#features) • [Screenshots](#screenshots) • [Telegram Bot](#-telegram-bot) • [MCP](#-mcp-integration) • [Contributing](#contributing) • [License](LICENSE.md)
 
 </div>
 
@@ -25,31 +25,31 @@
 
 ---
 
-## 🌟 Why MyTaskly?
+## 💡 Why MyTaskly?
 
-- **🤖 AI That Understands You** - Natural language conversations, voice commands
-- **⚡ Incredibly Fast** - Real-time syncing with zero lag
-- **🎨 Beautiful Design** - Minimalist UI
-- **🔐 Privacy-First** - Your data is encrypted and always under your control
-- **🌐 Multi-Platform** - Android (iOS and web in development)
-- **🎓 Easy to Use** - Interactive tutorial guides you through everything
+Most task managers make you adapt to them. MyTaskly adapts to you.
+
+You can type, speak, or just ask — the AI understands what you mean and takes care of the rest. No rigid workflows, no cluttered interfaces. Just your tasks, organized the way you think.
+
+Whether you're a student juggling deadlines, a professional managing projects, or just someone trying to keep life in order, MyTaskly gives you a single place where tasks, notes, calendar, and AI assistance all work together — seamlessly, in real time, even offline.
 
 **Built by Gabriel, a 16-year-old developer** over 11+ months of learning, coding, and iterating. [Read the story →](https://mytasklyapp.com/about)
 
 ---
 
-## Features
+## ✨ Features
 
 | Category | Features |
 |----------|----------|
 | **🤖 AI Assistant** | Natural language chat • Voice commands with VAD • Smart suggestions • Real-time streaming responses |
 | **📝 Task Management** | Rich editor • Custom categories • Shared tasks • Permission controls • Task templates |
 | **📅 Calendar** | Built-in calendar view • Google Calendar sync • Smart scheduling |
+| **🗒️ Notes** | Colorful sticky-note style notes on a virtual board — pin, organize, and keep ideas at a glance |
 | **🔔 Notifications** | Push reminders • Customizable alerts • Cross-device sync |
 | **🎨 Design** | Minimalist UI •  Smooth animations • Responsive layout |
-| **🔐 Security** | Google Sign-In • Account management • End-to-end encryption |
+| **🔐 Security** | Google Sign-In • MyTaskly account • End-to-end encryption |
 | **🎓 Onboarding** | Interactive tutorial • Contextual help • Progress tracking |
-| **🌐 Platform** Android (iOS coming soon)
+| **🌐 Platform** | Android (iOS coming soon)
 
 ---
 
@@ -59,86 +59,55 @@
 |:---:|:---:|:---:|
 | ![AI Assistant](./assets/readme/Chat%20testuale.png) | ![Task List](./assets/readme/Lista%20Task.png) | ![AI Chat](./assets/readme/Assistente%20vocale.png) |
 | **Smart Conversations** | **Powerful Organization** | **Voice Commands** |
-| Calendar View | Category Management | Settings |
-| ![Calendar](./assets/readme/Calendario.png) | ![Categories](./assets/readme/Categorie.png) | ![Settings](./assets/readme/Info.png) |
+
+| Calendar View | Category Management | Telegram Bot |
+|:---:|:---:|:---:|
+| ![Calendar](./assets/readme/Calendario.png) | ![Categories](./assets/readme/Categorie.png) | ![Telegram bot](./assets/readme/Telegram.png) |
 | **Visual Planning** | **Flexible Sharing** | **Full Control** |
 
 ---
 
-## 🚀 Getting Started
+## 📥 Download
 
-### Quick Start (5 minutes)
+Get MyTaskly on your device:
 
-```bash
-git clone https://github.com/Gabry848/MyTaskly-app.git
-cd MyTaskly-app && npm install
-cp .env.example .env && npm start
-```
+<div align="center">
 
-### Prerequisites
+| Platform | Status | Link |
+|:---:|:---:|:---:|
+| **Android** | ✅ Available | [<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="50" alt="Get it on Google Play"/>](https://play.google.com/store/apps/details?id=com.Gabry848Studio.Mytaskly) |
+| **iOS** | 🔜 Coming Soon | App Store — coming soon |
+| **APK (Direct)** | 🔜 Coming Soon | Direct download — coming soon |
 
-- **Node.js** v18+ • **npm** or **yarn**
-- **Expo CLI**: `npm install -g expo-cli` • **Git**
-- **iOS**: macOS + Xcode 14+ (optional)
-- **Android**: Android Studio + SDK 33+ (optional)
+</div>
 
-### Configuration
+---
 
-Create `.env` file:
+## 💬 Telegram Bot
 
-```env
-API_KEY=your_api_key_here
-API_URL=your_backend_url_here
-GOOGLE_WEB_CLIENT_ID=your_google_client_id
-GOOGLE_ANDROID_CLIENT_ID=your_google_android_client_id
-```
+MyTaskly is also available on **Telegram**! You can manage your tasks, get AI assistance, and stay productive directly from your favorite messaging app.
 
-### Firebase Configuration (Required)
+- **Find the bot**: Search for **[@MyTasklyBot](https://t.me/MyTasklyBot)** on Telegram
+- **Login options**: Sign in with your **Google account** or your **MyTaskly account** — no extra setup required
+- **Full integration**: The bot is connected to the same backend as the mobile app, so your tasks stay in sync across all platforms
 
-MyTaskly uses Firebase for push notifications and Google Sign-In. You need to configure Firebase:
+---
 
-#### Android Setup
+## 🔌 MCP Integration
 
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Create a new project or select an existing one
-3. Add an Android app with package name: `com.Gabry848Studio.Mytaskly`
-4. Download `google-services.json`
-5. Place it in the **root directory** of the project
-6. A template is provided: `google-services.json.example`
+The **MyTaskly MCP** (Model Context Protocol) server is **open source** and lets you connect MyTaskly to any MCP-compatible AI assistant (such as Claude Desktop).
 
-#### iOS Setup
+**Repository**: [github.com/Gabry848/MyTaskly-mcp](https://github.com/Gabry848/MyTaskly-mcp)
 
-1. In Firebase Console, add an iOS app
-2. Download `GoogleService-Info.plist`
-3. Place it in the `ios/` folder
+The MCP server exposes 20 tools across five categories:
 
-#### Security Best Practices
+- **Task Operations** — retrieve, create, update, and complete tasks
+- **Category Management** — organize and manage task categories
+- **Notes** — create and manage quick notes
+- **Utility Operations** — bulk actions and helpers
+- **System Health** — server status monitoring
 
-> **IMPORTANT**: Never commit `google-services.json` or `GoogleService-Info.plist` to version control!
-> These files are already in `.gitignore` for your protection.
-
-For additional security, configure API key restrictions in [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
-- Restrict Android API key to your app's package name and SHA-1 fingerprint
-- Restrict iOS API key to your app's bundle ID
-
-### Run the App
-
-| Platform | Command | Notes |
-|----------|---------|-------|
-| **Web** | `npm run web` | Instant preview |
-| **iOS** | `npm run ios` | Requires macOS + Xcode |
-| **Android** | `npm run android` | Requires Android Studio |
-| **Interactive** | `npm start` | Choose platform from menu |
-
-### Production Build
-
-```bash
-eas build --platform ios       # iOS only
-eas build --platform android   # Android only
-eas build --platform all       # Both platforms
-```
-
-📚 [Expo EAS Documentation](https://docs.expo.dev/build/introduction/)
+It uses **OAuth 2.1 with JWT** for secure authentication and is fully stateless — it never accesses the database directly, only communicates with the MyTaskly backend. You can use the official managed service or self-host it with your own instance.
 
 ---
 
@@ -233,13 +202,6 @@ See [CHANGELOG.md](./CHANGELOG.md) for a detailed list of changes and version hi
 
 This project is licensed under the **MIT License** - see the [LICENSE.md](./LICENSE.md) file for details.
 
-The MIT License allows you to:
-
-- ✅ Use commercially
-- ✅ Modify
-- ✅ Distribute
-- ✅ Private use
-
 ---
 
 ## 🌟 Support the Project
@@ -262,6 +224,7 @@ MyTaskly was created by **Gabriel** ([@Gabry848](https://github.com/Gabry848)), 
 
 ### Contact & Links
 
+- **Website**: [mytasklyapp.com](https://mytasklyapp.com)
 - **GitHub**: [@Gabry848](https://github.com/Gabry848)
 - **Project Repository**: [MyTaskly-app](https://github.com/Gabry848/MyTaskly-app)
 - **Issues & Bug Reports**: [GitHub Issues](https://github.com/Gabry848/MyTaskly-app/issues)
@@ -279,17 +242,6 @@ Special thanks to:
 
 ---
 
-## 📚 Documentation
-
-For more detailed documentation, check out:
-
-- [Installation Guide](./docs/installation.md) (coming soon)
-- [API Documentation](./docs/api.md) (coming soon)
-- [Development Guide](./docs/development.md) (coming soon)
-- [Deployment Guide](./docs/deployment.md) (coming soon)
-
----
-
 ## 🐛 Known Issues & Roadmap
 
 Check our [GitHub Issues](https://github.com/Gabry848/MyTaskly-app/issues) for:
@@ -303,11 +255,11 @@ Check our [GitHub Issues](https://github.com/Gabry848/MyTaskly-app/issues) for:
 
 - [ ] Desktop app (Electron)
 - [ ] Widget support (iOS/Android)
-- [ ] More AI models to choose from
+- [ ] advanced AI features
 - [ ] Task analytics and insights
-- [ ] Pomodoro timer integration
-- [ ] Habit tracking
-- [ ] Team workspaces
+- [ ] recurrent tasks
+
+And a lot more!
 
 ---
 
