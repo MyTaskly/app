@@ -567,12 +567,14 @@ const CalendarView: React.FC = () => {
 const styles = StyleSheet.create({
   calendarContainer: {
     flex: 1,
-    padding: 20,
+    paddingTop: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
     backgroundColor: "#ffffff",
   },
   selectedDateHeader: {
-    marginTop: 35,
-    marginBottom: 15,
+    marginTop: 20,
+    marginBottom: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',

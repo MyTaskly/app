@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   header: {
-    paddingTop: 20,
+    paddingTop: 4,
     paddingHorizontal: 15,
     paddingBottom: 0,
     flexDirection: "row",
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   mainTitle: {
-    paddingTop: 10,
+    paddingTop: 2,
     fontSize: 30,
     fontWeight: "200", // Stesso peso di Home20
     color: "#000000",

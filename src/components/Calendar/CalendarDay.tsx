@@ -57,10 +57,10 @@ const CalendarDay: React.FC<CalendarDayProps> = ({
 const styles = StyleSheet.create({
   calendarDay: {
     width: `${100 / 7}%`,
-    aspectRatio: 1,
+    height: 44,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 4,
     borderRadius: 12,
     position: 'relative',
   },

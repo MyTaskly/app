@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 25,
+    marginBottom: 8,
     paddingHorizontal: 5,
   },
   calendarMonthTitle: {
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   weekdaysRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 15,
+    marginBottom: 6,
     paddingHorizontal: 5,
   },
   weekdayText: {
@@ -200,9 +200,6 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     width: "100%",
     paddingHorizontal: 5,
-    // Rimuovo l'altezza fissa che causava problemi su dispositivi diversi
-    // Uso aspectRatio per mantenere la griglia proporzionata
-    aspectRatio: 2.1, // Un po' più larga che alta per adattarsi ai giorni
   },
 });
 
