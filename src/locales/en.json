@@ -32,30 +32,26 @@
       "bugReport": "Bug Report",
       "notFound": "Page not found",
       "notificationSettings": "Notification Settings",
-      "memorySettings": "Memory Settings"
+      "memorySettings": "Memory Settings",
+      "aiSettings": "AI Settings"
     }
   },
   "settings": {
     "title": "Settings",
     "sections": {
       "account": "Account",
-      "support": "Support",
+      "ai": "Artificial Intelligence",
       "general": "General",
-      "info": "Info",
-      "development": "Development"
+      "app": "App"
     },
     "menu": {
       "manageAccount": "Manage account",
-      "changePassword": "Change password",
-      "help": "Help",
+      "aiSettings": "AI Settings",
       "language": "Language",
-      "voiceSettings": "Voice settings",
       "googleCalendar": "Google Calendar",
       "about": "About",
       "tutorial": "Review Tutorial",
-      "testNotifications": "Test Notifications (10s)",
-      "notificationSettings": "Notifications",
-      "memorySettings": "Chatbot Memory"
+      "notificationSettings": "Notifications"
     },
     "tutorial": {
       "restartTitle": "Tutorial",
@@ -391,6 +387,36 @@
     },
     "messages": {
       "changed": "Language changed successfully"
+    }
+  },
+  "aiSettings": {
+    "intro": "Configure MyTaskly's artificial intelligence: choose the model, manage chatbot memory and personalise the voice.",
+    "sections": {
+      "model": "AI Model",
+      "modelDesc": "The model determines the quality and speed of responses.",
+      "usage": "Monthly usage",
+      "usageDesc": "Number of messages sent to the chatbot this month.",
+      "features": "Features"
+    },
+    "model": {
+      "base": {
+        "label": "Base",
+        "desc": "Fast responses, ideal for everyday tasks"
+      },
+      "advanced": {
+        "label": "Advanced",
+        "desc": "More context and reasoning, for complex requests"
+      }
+    },
+    "usage": {
+      "messages": "Messages this month",
+      "remaining": "{{n}} messages remaining"
+    },
+    "menu": {
+      "voice": "Voice",
+      "voiceDesc": "Voice model, gender and audio quality",
+      "memory": "Memory",
+      "memoryDesc": "Manage chatbot memories"
     }
   },
   "voiceSettings": {

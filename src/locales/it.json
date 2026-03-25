@@ -32,30 +32,27 @@
       "bugReport": "Segnala Bug",
       "notFound": "Pagina non trovata",
       "notificationSettings": "Impostazioni Notifiche",
-      "memorySettings": "Impostazioni Memoria"
+      "memorySettings": "Impostazioni Memoria",
+      "aiSettings": "Impostazioni AI"
     }
   },
+
   "settings": {
     "title": "Impostazioni",
     "sections": {
       "account": "Account",
-      "support": "Supporto",
+      "ai": "Intelligenza Artificiale",
       "general": "Generale",
-      "info": "Info",
-      "development": "Development"
+      "app": "App"
     },
     "menu": {
       "manageAccount": "Gestisci account",
-      "changePassword": "Cambia password",
-      "help": "Aiuto",
+      "aiSettings": "Impostazioni AI",
       "language": "Lingua",
-      "voiceSettings": "Impostazioni vocali",
       "googleCalendar": "Google Calendar",
       "about": "Info",
       "tutorial": "Rivedi Tutorial",
-      "testNotifications": "Test Notifiche (10s)",
-      "notificationSettings": "Notifiche",
-      "memorySettings": "Memoria Chatbot"
+      "notificationSettings": "Notifiche"
     },
     "tutorial": {
       "restartTitle": "Tutorial",
@@ -391,6 +388,36 @@
     },
     "messages": {
       "changed": "Lingua modificata con successo"
+    }
+  },
+  "aiSettings": {
+    "intro": "Configura il comportamento dell'intelligenza artificiale di MyTaskly: scegli il modello, gestisci la memoria del chatbot e personalizza la voce.",
+    "sections": {
+      "model": "Modello AI",
+      "modelDesc": "Il modello determina la qualità e la velocità delle risposte.",
+      "usage": "Utilizzo mensile",
+      "usageDesc": "Numero di messaggi inviati al chatbot questo mese.",
+      "features": "Funzionalità"
+    },
+    "model": {
+      "base": {
+        "label": "Base",
+        "desc": "Risposte rapide, ideale per task quotidiani"
+      },
+      "advanced": {
+        "label": "Avanzato",
+        "desc": "Più contesto e ragionamento, per richieste complesse"
+      }
+    },
+    "usage": {
+      "messages": "Messaggi questo mese",
+      "remaining": "{{n}} messaggi rimanenti"
+    },
+    "menu": {
+      "voice": "Voce",
+      "voiceDesc": "Modello vocale, genere e qualità audio",
+      "memory": "Memoria",
+      "memoryDesc": "Gestisci i ricordi del chatbot"
     }
   },
   "voiceSettings": {

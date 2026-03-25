@@ -6,7 +6,6 @@ import { StatusBar } from 'expo-status-bar';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../types';
 import { Ionicons } from '@expo/vector-icons';
-import axiosInstance from '../../services/axiosInstance';
 import { useTranslation } from 'react-i18next';
 import { useTutorialContext } from '../../contexts/TutorialContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,52 +16,9 @@ export default function Settings() {
   const { t } = useTranslation();
   const { startTutorial } = useTutorialContext();
 
-  const handleNavigateToAccountSettings = () => {
-    navigation.navigate('AccountSettings');
-  };
-
-  const handleNavigateToChangePassword = () => {
-    navigation.navigate('ChangePassword');
-  };
-
-  const handleNavigateToHelp = () => {
-    navigation.navigate('Help');
-  };
-
-  const handleNavigateToAbout = () => {
-    navigation.navigate('About');
-  };
-
-  const handleNavigateToLanguage = () => {
-    navigation.navigate('Language');
-  };
-
-  const handleNavigateToVoiceSettings = () => {
-    navigation.navigate('VoiceSettings');
-  };
-
-  const handleNavigateToGoogleCalendar = () => {
-    navigation.navigate('GoogleCalendar');
-  };
-
-  const handleNavigateToNotificationSettings = () => {
-    navigation.navigate('NotificationSettings');
-  };
-
-  const handleNavigateToMemorySettings = () => {
-    navigation.navigate('MemorySettings');
-  };
-
-  const handleNavigateToCalendarWidgetDemo = () => {
-    navigation.navigate('CalendarWidgetDemo');
-  };
-
   const handleRestartTutorial = async () => {
     try {
-      // Remove tutorial completion flag to allow restart
       await AsyncStorage.removeItem(TUTORIAL_STORAGE_KEY);
-      
-      // Start the tutorial
       startTutorial();
     } catch (error) {
       console.error('[Settings] Error restarting tutorial:', error);
@@ -74,27 +30,10 @@ export default function Settings() {
     }
   };
 
-  const testNotification = async () => {
-    try {
-      const response = await axiosInstance.post('api/notifications/test-timer-notification', {
-        title: "Test Timer",
-        body: "Notifica di test in arrivo",
-        delay_seconds: 10
-      });
-
-      console.log('Timer avviato:', response.data.estimated_arrival);
-
-    } catch (error) {
-      console.error('Errore test:', error);
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
-      
 
-      {/* Content */}
       <ScrollView style={styles.content}>
         {/* Account Section */}
         <View style={styles.sectionHeader}>
@@ -103,7 +42,7 @@ export default function Settings() {
 
         <TouchableOpacity
           style={styles.menuItem}
-          onPress={handleNavigateToAccountSettings}
+          onPress={() => navigation.navigate('AccountSettings')}
         >
           <View style={styles.menuItemContent}>
             <Ionicons name="person-outline" size={24} color="#000000" />
@@ -112,29 +51,18 @@ export default function Settings() {
           <Ionicons name="chevron-forward" size={20} color="#666666" />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={handleNavigateToChangePassword}
-        >
-          <View style={styles.menuItemContent}>
-            <Ionicons name="key-outline" size={24} color="#000000" />
-            <Text style={styles.menuItemText}>{t('settings.menu.changePassword')}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#666666" />
-        </TouchableOpacity>
-
-        {/* Support Section */}
+        {/* AI Section */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t('settings.sections.support')}</Text>
+          <Text style={styles.sectionTitle}>{t('settings.sections.ai')}</Text>
         </View>
 
         <TouchableOpacity
           style={styles.menuItem}
-          onPress={handleNavigateToHelp}
+          onPress={() => navigation.navigate('AISettings')}
         >
           <View style={styles.menuItemContent}>
-            <Ionicons name="help-circle-outline" size={24} color="#000000" />
-            <Text style={styles.menuItemText}>{t('settings.menu.help')}</Text>
+            <Ionicons name="sparkles-outline" size={24} color="#000000" />
+            <Text style={styles.menuItemText}>{t('settings.menu.aiSettings')}</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color="#666666" />
         </TouchableOpacity>
@@ -146,7 +74,7 @@ export default function Settings() {
 
         <TouchableOpacity
           style={styles.menuItem}
-          onPress={handleNavigateToLanguage}
+          onPress={() => navigation.navigate('Language')}
         >
           <View style={styles.menuItemContent}>
             <Ionicons name="language-outline" size={24} color="#000000" />
@@ -157,18 +85,7 @@ export default function Settings() {
 
         <TouchableOpacity
           style={styles.menuItem}
-          onPress={handleNavigateToVoiceSettings}
-        >
-          <View style={styles.menuItemContent}>
-            <Ionicons name="mic-outline" size={24} color="#000000" />
-            <Text style={styles.menuItemText}>{t('settings.menu.voiceSettings')}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#666666" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={handleNavigateToGoogleCalendar}
+          onPress={() => navigation.navigate('GoogleCalendar')}
         >
           <View style={styles.menuItemContent}>
             <Ionicons name="calendar-outline" size={24} color="#000000" />
@@ -179,7 +96,7 @@ export default function Settings() {
 
         <TouchableOpacity
           style={styles.menuItem}
-          onPress={handleNavigateToNotificationSettings}
+          onPress={() => navigation.navigate('NotificationSettings')}
         >
           <View style={styles.menuItemContent}>
             <Ionicons name="notifications-outline" size={24} color="#000000" />
@@ -188,20 +105,14 @@ export default function Settings() {
           <Ionicons name="chevron-forward" size={20} color="#666666" />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={handleNavigateToMemorySettings}
-        >
-          <View style={styles.menuItemContent}>
-            <Ionicons name="bookmark-outline" size={24} color="#000000" />
-            <Text style={styles.menuItemText}>{t('settings.menu.memorySettings')}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#666666" />
-        </TouchableOpacity>
+        {/* App Section */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{t('settings.sections.app')}</Text>
+        </View>
 
         <TouchableOpacity
           style={styles.menuItem}
-          onPress={handleNavigateToAbout}
+          onPress={() => navigation.navigate('About')}
         >
           <View style={styles.menuItemContent}>
             <Ionicons name="information-circle-outline" size={24} color="#000000" />
@@ -219,21 +130,6 @@ export default function Settings() {
             <Text style={styles.menuItemText}>{t('settings.menu.tutorial')}</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color="#666666" />
-        </TouchableOpacity>
-
-        {/* Development Section */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t('settings.sections.development')}</Text>
-        </View>
-
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={testNotification}
-        >
-          <View style={styles.menuItemContent}>
-            <Ionicons name="notifications-outline" size={24} color="#000000" />
-            <Text style={styles.menuItemText}>{t('settings.menu.testNotifications')}</Text>
-          </View>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

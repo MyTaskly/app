@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, KeyboardAvoidingView, Platform, Alert, Keyboard, Dimensions } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { sendMessageToBot, createNewChat, formatMessage, clearChatHistory } from '../../services/textBotService';
 import { getChatWithMessages, ChatMessage } from '../../services/chatHistoryService';
@@ -67,6 +68,9 @@ const BotChat: React.FC = () => {
   // Inizializzazione della chat al primo render
   useEffect(() => {
     initializeChat();
+    AsyncStorage.getItem('ai_model_tier').then((val) => {
+      if (val === 'advanced' || val === 'base') setModelType(val);
+    });
   }, []);
   // Gestione eventi tastiera per Android e iPad
   useEffect(() => {
