@@ -13,7 +13,7 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { GestureDetector, Gesture, GestureHandlerRootView } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
@@ -37,6 +37,7 @@ import { useTutorialContext } from "../../contexts/TutorialContext";
 const HomeScreen = () => {
   const { t } = useTranslation();
   const { startTutorial } = useTutorialContext();
+  const insets = useSafeAreaInsets();
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);  const [isLoading, setIsLoading] = useState(false);
@@ -181,10 +182,10 @@ const HomeScreen = () => {
       "keyboardDidShow",
       (event) => {
         if (chatStarted) {
-          // Chat mode: usa direttamente l'altezza della tastiera come offset
+          // Chat mode: sottrae il bottom inset (barra navigazione) per evitare doppio offset
           const keyboardHeight = event.endCoordinates.height;
           Animated.timing(inputBottomPosition, {
-            toValue: Math.max(keyboardHeight, 0),
+            toValue: Math.max(keyboardHeight - insets.bottom, 0),
             duration: 250,
             useNativeDriver: false,
           }).start();
@@ -235,7 +236,7 @@ const HomeScreen = () => {
       keyboardDidShowListener?.remove();
       keyboardDidHideListener?.remove();
     };
-  }, [chatStarted, inputBottomPosition, greetingShiftAnim]);
+  }, [chatStarted, inputBottomPosition, greetingShiftAnim, insets.bottom]);
 
   const startChatAnimation = useCallback(() => {
     setChatStarted(true);
