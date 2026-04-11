@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -52,6 +53,7 @@ const HomeScreen = () => {
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const [modelType, setModelType] = useState<'base' | 'advanced'>('base');
   const greetingVariant = useRef(Math.floor(Math.random() * 7)).current;
 
   // Costanti
@@ -72,6 +74,15 @@ const HomeScreen = () => {
   const chatHistoryOpacity = useRef(new Animated.Value(0)).current;
   const greetingInputRef = useRef<View>(null);
   const greetingShiftAnim = useRef(new Animated.Value(0)).current;
+  // Rilegge il modello AI ogni volta che la schermata torna in focus
+  useFocusEffect(
+    useCallback(() => {
+      AsyncStorage.getItem('ai_model_tier').then((val) => {
+        if (val === 'advanced' || val === 'base') setModelType(val);
+      });
+    }, [])
+  );
+
   // Effetto per recuperare il nome dell'utente e inizializzare cache
   useEffect(() => {
     const initialize = async () => {
@@ -315,7 +326,7 @@ const HomeScreen = () => {
       text: "",
       sender: "bot",
       start_time: new Date(),
-      modelType: "advanced",
+      modelType: modelType,
       isStreaming: true,
       isComplete: false,
     };
@@ -404,7 +415,7 @@ const HomeScreen = () => {
       // Invia il messaggio al bot con streaming e chat_id
       const result = await sendMessageToBot(
         trimmedMessage,
-        "advanced",
+        modelType,
         onStreamChunk,
         chatIdToUse || undefined
       );
@@ -507,7 +518,7 @@ const HomeScreen = () => {
       text: response,
       sender: "bot",
       start_time: new Date(),
-      modelType: "advanced",
+      modelType: modelType,
       isStreaming: false,
       isComplete: true,
     };
