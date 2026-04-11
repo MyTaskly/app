@@ -59,7 +59,13 @@
       "WebFetch(domain:www.npmjs.com)",
       "WebFetch(domain:docs.expo.dev)",
       "WebFetch(domain:github.com)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(openspec new:*)",
+      "Bash(openspec status:*)",
+      "Bash(openspec instructions:*)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(f'Progress: {d[\\\\\"progress\\\\\"][\\\\\"complete\\\\\"]}/{d[\\\\\"progress\\\\\"][\\\\\"total\\\\\"]}'\\); [print\\(f'  [{\\\\\"x\\\\\" if t[\\\\\"done\\\\\"] else \\\\\" \\\\\"}] {t[\\\\\"description\\\\\"][:80]}'\\) for t in d['tasks']]\")",
+      "Bash(git checkout:*)",
+      "Bash(gh pr:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
