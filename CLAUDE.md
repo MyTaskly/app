@@ -50,7 +50,7 @@ src/
 ├── components/          # Reusable UI components
 │   └── Tutorial/        # Interactive onboarding tutorial system
 ├── navigation/          # Navigation structure
-│   └── screens/         # Main app screens (Home, TaskList, BotChat, etc.)
+│   └── screens/         # Main app screens (Home, TaskList, AISettings, etc.)
 ├── services/            # Business logic and API integration
 ├── contexts/            # React Context providers for global state
 ├── hooks/               # Custom React hooks
@@ -86,11 +86,13 @@ src/
 - Change tracking for sync operations
 - Automatic cache invalidation on sync
 
-#### 5. **AI Chat & Voice** (`src/services/botservice.ts`)
-- Server-Sent Events (SSE) streaming for real-time responses
-- Custom streaming callback pattern
-- WebSocket support for voice interactions via `VoiceBotWebSocket` class
-- Message validation and formatting utilities
+#### 5. **AI Chat & Voice** (`src/services/textBotService.ts`, `src/services/voiceBotService.ts`)
+- La chat testuale è implementata in **`src/navigation/screens/Home.tsx`** (non esiste una schermata BotChat separata)
+- Server-Sent Events (SSE) streaming per risposte in tempo reale via `textBotService.ts`
+- Il tipo di modello (`'base'` | `'advanced'`) è salvato in AsyncStorage con chiave `'ai_model_tier'`
+- `AISettings.tsx` permette di selezionare il modello; `Home.tsx` lo rilegge via `useFocusEffect` a ogni focus
+- WebSocket support for voice interactions via `VoiceBotWebSocket` class in `voiceBotService.ts`
+- Message validation and formatting utilities in `textBotService.ts`
 - Structured data extraction from AI responses
 
 #### 6. **Notifications** (`src/services/notificationService.ts`, `taskNotificationService.ts`)
