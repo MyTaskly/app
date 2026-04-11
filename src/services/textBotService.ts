@@ -32,7 +32,7 @@ export async function sendMessageToBot(
   modelType: "base" | "advanced" = "base",
   onStreamChunk?: StreamingCallback,
   chatId?: string
-): Promise<{text: string, toolWidgets: ToolWidget[], chat_id?: string, is_new?: boolean}> {
+): Promise<{text: string, toolWidgets: ToolWidget[], chat_id?: string, is_new?: boolean, quotaExceeded?: boolean, remainingMessages?: number, rateLimitReset?: number}> {
   try {
     // Verifica che l'utente sia autenticato
     const token = await getValidToken();
@@ -70,8 +70,21 @@ export async function sendMessageToBot(
     });
 
     if (!response.ok) {
+      if (response.status === 429) {
+        const rateLimitReset = response.headers.get('X-RateLimit-Reset');
+        return {
+          text: '',
+          toolWidgets: [],
+          quotaExceeded: true,
+          rateLimitReset: rateLimitReset ? parseInt(rateLimitReset, 10) : undefined,
+        };
+      }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    // Read remaining quota from headers before consuming body
+    const rateLimitRemainingHeader = response.headers.get('X-RateLimit-Remaining');
+    const remainingMessages = rateLimitRemainingHeader !== null ? parseInt(rateLimitRemainingHeader, 10) : undefined;
 
     if (!response.body) {
       console.log(response)
@@ -277,6 +290,7 @@ export async function sendMessageToBot(
       toolWidgets: Array.from(toolWidgetsMap.values()),
       chat_id: receivedChatId,
       is_new: isNewChat,
+      remainingMessages,
     };
 
   } catch (error: any) {
