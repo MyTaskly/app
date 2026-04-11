@@ -58,6 +58,7 @@ export function useVoiceChat() {
   const [hasPermissions, setHasPermissions] = useState<boolean>(false);
   const [chunksReceived, setChunksReceived] = useState<number>(0);
   const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [isVoiceQuotaExceeded, setIsVoiceQuotaExceeded] = useState<boolean>(false);
 
   // Trascrizioni e tool
   const [transcripts, setTranscripts] = useState<VoiceTranscript[]>([]);
@@ -119,6 +120,7 @@ export function useVoiceChat() {
     onToolOutput:           (...args) => websocketCallbacksRef.current.onToolOutput?.(...args),
     onDone:                 (...args) => websocketCallbacksRef.current.onDone?.(...args),
     onError:                (...args) => websocketCallbacksRef.current.onError?.(...args),
+    onVoiceQuotaExceeded:   () => websocketCallbacksRef.current.onVoiceQuotaExceeded?.(),
   }).current;
 
   // Aggiorna il ref ad ogni render con le callback che chiudono su stato/ref correnti
@@ -291,7 +293,13 @@ export function useVoiceChat() {
       if (!isMountedRef.current) return;
       setError(errorMessage);
       setState('error');
-    }
+    },
+
+    onVoiceQuotaExceeded: () => {
+      if (!isMountedRef.current) return;
+      setIsVoiceQuotaExceeded(true);
+      setState('error');
+    },
   };
 
   /**
@@ -331,6 +339,7 @@ export function useVoiceChat() {
 
     setState('connecting');
     setError(null);
+    setIsVoiceQuotaExceeded(false);
     setTranscripts([]);
     setActiveTools([]);
     setChunksReceived(0);
@@ -562,6 +571,7 @@ export function useVoiceChat() {
     setState('idle');
     setServerStatus(null);
     setError(null);
+    setIsVoiceQuotaExceeded(false);
     setTranscripts([]);
     setActiveTools([]);
     setRecordingDuration(0);
@@ -650,6 +660,7 @@ export function useVoiceChat() {
     hasPermissions,
     chunksReceived,
     isMuted,
+    isVoiceQuotaExceeded,
 
     // Trascrizioni e tool
     transcripts,

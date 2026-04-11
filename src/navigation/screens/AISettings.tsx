@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
   View,
   TouchableOpacity,
   ScrollView,
-  Animated,
+  Alert,
+  ActivityIndicator,
   Text,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,38 +15,138 @@ import { RootStackParamList } from '../../types';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUserPlan, isUnlimitedPlan, UserPlan } from '../../services/planService';
 
 const AI_MODEL_KEY = 'ai_model_tier';
 type ModelTier = 'base' | 'advanced';
-
-// Demo usage data
-const USAGE_USED = 348;
-const USAGE_LIMIT = 500;
-const USAGE_RATIO = USAGE_USED / USAGE_LIMIT;
 
 export default function AISettings() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { t } = useTranslation();
   const [model, setModel] = useState<ModelTier>('base');
-  const barAnim = useRef(new Animated.Value(0)).current;
+
+  // Plan & Usage state
+  const [planData, setPlanData] = useState<UserPlan | null>(null);
+  const [planLoading, setPlanLoading] = useState(true);
+  const [planError, setPlanError] = useState(false);
+
+  const loadPlan = useCallback(async () => {
+    try {
+      setPlanLoading(true);
+      setPlanError(false);
+      const data = await getUserPlan();
+      setPlanData(data);
+    } catch {
+      setPlanError(true);
+    } finally {
+      setPlanLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     AsyncStorage.getItem(AI_MODEL_KEY).then((val) => {
       if (val === 'advanced' || val === 'base') setModel(val);
     });
-    Animated.timing(barAnim, {
-      toValue: USAGE_RATIO,
-      duration: 900,
-      useNativeDriver: false,
-    }).start();
-  }, []);
+    loadPlan();
+  }, [loadPlan]);
 
   const handleModelSelect = async (tier: ModelTier) => {
     setModel(tier);
     await AsyncStorage.setItem(AI_MODEL_KEY, tier);
   };
 
-  const barColor = USAGE_RATIO > 0.85 ? '#dc3545' : USAGE_RATIO > 0.6 ? '#f4a322' : '#000000';
+  const formatResetDate = (dateStr: string): string => {
+    try {
+      const date = new Date(dateStr + 'T00:00:00');
+      return date.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const renderProgressBar = (used: number, limit: number) => {
+    const fraction = limit > 0 ? Math.min(used / limit, 1) : 0;
+    const isNearLimit = fraction >= 0.8;
+    return (
+      <View style={styles.progressBarTrack}>
+        <View
+          style={[
+            styles.progressBarFill,
+            { width: `${Math.round(fraction * 100)}%` as any },
+            isNearLimit && styles.progressBarWarning,
+          ]}
+        />
+      </View>
+    );
+  };
+
+  const renderPlanSection = () => {
+    if (planLoading) {
+      return (
+        <View style={styles.planCard}>
+          <ActivityIndicator size="small" color="#000000" />
+          <Text style={styles.planLoadingText}>{t('planUsage.loading')}</Text>
+        </View>
+      );
+    }
+
+    if (planError || !planData) {
+      return (
+        <TouchableOpacity style={styles.planCard} onPress={loadPlan}>
+          <Text style={styles.planErrorText}>{t('planUsage.error')}</Text>
+        </TouchableOpacity>
+      );
+    }
+
+    const textUnlimited = isUnlimitedPlan(planData.text_messages_limit);
+    const voiceUnlimited = isUnlimitedPlan(planData.voice_requests_limit);
+
+    return (
+      <View style={styles.planCard}>
+        <View style={styles.planBadgeRow}>
+          <View style={styles.planBadge}>
+            <Text style={styles.planBadgeText}>{planData.plan}</Text>
+          </View>
+          <Text style={styles.resetDateText}>
+            {t('planUsage.resetsOn', { date: formatResetDate(planData.reset_date) })}
+          </Text>
+        </View>
+
+        <View style={styles.usageRow}>
+          <View style={styles.usageLabelRow}>
+            <Text style={styles.usageLabel}>{t('planUsage.textMessages')}</Text>
+            <Text style={styles.usageCount}>
+              {textUnlimited
+                ? t('planUsage.unlimited')
+                : `${planData.text_messages_used} / ${planData.text_messages_limit}`}
+            </Text>
+          </View>
+          {!textUnlimited && renderProgressBar(planData.text_messages_used, planData.text_messages_limit)}
+        </View>
+
+        <View style={styles.usageRow}>
+          <View style={styles.usageLabelRow}>
+            <Text style={styles.usageLabel}>{t('planUsage.voiceRequests')}</Text>
+            <Text style={styles.usageCount}>
+              {voiceUnlimited
+                ? t('planUsage.unlimited')
+                : `${planData.voice_requests_used} / ${planData.voice_requests_limit}`}
+            </Text>
+          </View>
+          {!voiceUnlimited && renderProgressBar(planData.voice_requests_used, planData.voice_requests_limit)}
+        </View>
+
+        {planData.plan === 'FREE' && (
+          <TouchableOpacity
+            style={styles.upgradeButton}
+            onPress={() => Alert.alert(t('planUsage.upgrade'), 'Coming soon!')}
+          >
+            <Text style={styles.upgradeButtonText}>{t('planUsage.upgrade')}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -92,37 +193,10 @@ export default function AISettings() {
 
         {/* ── USAGE ── */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t('aiSettings.sections.usage')}</Text>
-          <Text style={styles.sectionDesc}>{t('aiSettings.sections.usageDesc')}</Text>
+          <Text style={styles.sectionTitle}>{t('planUsage.sectionTitle')}</Text>
         </View>
-
-        <View style={styles.usageCard}>
-          <View style={styles.usageRow}>
-            <Text style={styles.usageLabel}>{t('aiSettings.usage.messages')}</Text>
-            <Text style={styles.usageCount}>
-              <Text style={styles.usageUsed}>{USAGE_USED}</Text>
-              <Text style={styles.usageOf}> / {USAGE_LIMIT}</Text>
-            </Text>
-          </View>
-
-          <View style={styles.barTrack}>
-            <Animated.View
-              style={[
-                styles.barFill,
-                {
-                  width: barAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['0%', '100%'],
-                  }),
-                  backgroundColor: barColor,
-                },
-              ]}
-            />
-          </View>
-
-          <Text style={styles.usageHint}>
-            {t('aiSettings.usage.remaining', { n: USAGE_LIMIT - USAGE_USED })}
-          </Text>
+        <View style={styles.planCardWrapper}>
+          {renderPlanSection()}
         </View>
 
         {/* ── FEATURES ── */}
@@ -277,57 +351,100 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Usage card
-  usageCard: {
-    marginHorizontal: 20,
-    padding: 16,
+  // Plan & Usage card
+  planCardWrapper: {
+    paddingHorizontal: 20,
+  },
+  planCard: {
     backgroundColor: '#f8f9fa',
-    borderRadius: 12,
+    borderRadius: 16,
+    padding: 16,
     borderWidth: 1,
     borderColor: '#e1e5e9',
   },
+  planLoadingText: {
+    fontSize: 14,
+    color: '#666666',
+    fontFamily: 'System',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  planErrorText: {
+    fontSize: 14,
+    color: '#666666',
+    fontFamily: 'System',
+    textAlign: 'center',
+  },
+  planBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  planBadge: {
+    backgroundColor: '#000000',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  planBadgeText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '600',
+    fontFamily: 'System',
+    letterSpacing: 0.5,
+  },
+  resetDateText: {
+    fontSize: 12,
+    color: '#666666',
+    fontFamily: 'System',
+  },
   usageRow: {
+    marginBottom: 12,
+  },
+  usageLabelRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'baseline',
-    marginBottom: 10,
+    marginBottom: 6,
   },
   usageLabel: {
     fontSize: 14,
-    color: '#495057',
+    color: '#333333',
     fontFamily: 'System',
-    fontWeight: '500',
+    fontWeight: '400',
   },
   usageCount: {
     fontSize: 14,
+    color: '#333333',
     fontFamily: 'System',
+    fontWeight: '500',
   },
-  usageUsed: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-    fontFamily: 'System',
-  },
-  usageOf: {
-    fontSize: 14,
-    color: '#6c757d',
-    fontFamily: 'System',
-  },
-  barTrack: {
+  progressBarTrack: {
     height: 6,
-    backgroundColor: '#dee2e6',
+    backgroundColor: '#e1e5e9',
     borderRadius: 3,
     overflow: 'hidden',
   },
-  barFill: {
-    height: '100%',
+  progressBarFill: {
+    height: 6,
+    backgroundColor: '#000000',
     borderRadius: 3,
   },
-  usageHint: {
-    fontSize: 12,
-    color: '#6c757d',
+  progressBarWarning: {
+    backgroundColor: '#FF6B35',
+  },
+  upgradeButton: {
+    marginTop: 12,
+    backgroundColor: '#000000',
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  upgradeButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
     fontFamily: 'System',
-    marginTop: 8,
   },
 
   // Feature links

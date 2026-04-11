@@ -122,6 +122,8 @@ export interface VoiceChatCallbacks {
   onAuthenticationFailed?: (error: string) => void;
   onReady?: () => void;
   onDone?: () => void;
+  /** Called when the server closes the connection with code 4029 (voice quota exceeded). */
+  onVoiceQuotaExceeded?: () => void;
 }
 
 /**
@@ -245,6 +247,13 @@ export class VoiceBotWebSocket {
           this.messageQueue = [];
           _vLog(`WS chiuso — code=${event.code} reason="${event.reason}" reconnectAttempts=${this.reconnectAttempts}`);
           this.callbacks.onConnectionClose?.();
+
+          if (event.code === 4029) {
+            // Voice quota exceeded — do not reconnect
+            _vLog('WS chiuso con 4029 — quota vocale esaurita, nessun reconnect');
+            this.callbacks.onVoiceQuotaExceeded?.();
+            return;
+          }
 
           if (this.reconnectAttempts < this.maxReconnectAttempts && event.code !== 1000) {
             this.attemptReconnect();
@@ -471,6 +480,14 @@ export class VoiceBotWebSocket {
    */
   private handleErrorResponse(response: VoiceErrorResponse): void {
     if (!response.message) return;
+
+    // Check for voice quota exceeded before auth state handling
+    if (response.message.toLowerCase().includes('quota exceeded')) {
+      _vLog('Quota vocale esaurita (error frame)');
+      trackVoiceChatError('voice_quota_exceeded');
+      this.callbacks.onVoiceQuotaExceeded?.();
+      return;
+    }
 
     if (this.authState === WebSocketAuthState.AUTHENTICATING) {
       this.authState = WebSocketAuthState.FAILED;

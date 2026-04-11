@@ -908,6 +908,23 @@
       "getStarted": "Get Started"
     }
   },
+  "planUsage": {
+    "sectionTitle": "Plan & Usage",
+    "plan": "Plan",
+    "unlimited": "Unlimited",
+    "textMessages": "Text messages",
+    "voiceRequests": "Voice requests",
+    "resetsOn": "Resets on {{date}}",
+    "upgrade": "Upgrade plan",
+    "loading": "Loading plan info...",
+    "error": "Unable to load plan information. Tap to retry.",
+    "quotaExceeded": "You have reached the monthly message limit for your {{plan}} plan. Counters reset on {{date}}.",
+    "voiceQuotaExceeded": "You have used all monthly voice requests for the {{plan}} plan. You can still use the text chat.",
+    "goToPlan": "View plan",
+    "remaining": "{{n}} messages left this month",
+    "remainingWarning": "Only {{n}} messages left this month",
+    "quotaZero": "Monthly limit reached"
+  },
   "memorySettings": {
     "loading": "Loading memories...",
     "enableMemory": "Enable chatbot memory",

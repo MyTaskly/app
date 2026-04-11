@@ -908,6 +908,23 @@
       "getStarted": "Inizia"
     }
   },
+  "planUsage": {
+    "sectionTitle": "Piano & Utilizzo",
+    "plan": "Piano",
+    "unlimited": "Illimitato",
+    "textMessages": "Messaggi di testo",
+    "voiceRequests": "Richieste vocali",
+    "resetsOn": "Si azzera il {{date}}",
+    "upgrade": "Aggiorna piano",
+    "loading": "Caricamento piano...",
+    "error": "Impossibile caricare le informazioni sul piano. Tocca per riprovare.",
+    "quotaExceeded": "Hai raggiunto il limite mensile di messaggi per il tuo piano {{plan}}. I contatori si resettano il {{date}}.",
+    "voiceQuotaExceeded": "Hai esaurito le richieste vocali mensili per il piano {{plan}}. Puoi continuare a usare la chat testuale.",
+    "goToPlan": "Vai al piano",
+    "remaining": "{{n}} messaggi rimasti questo mese",
+    "remainingWarning": "Ti restano solo {{n}} messaggi questo mese",
+    "quotaZero": "Limite mensile raggiunto"
+  },
   "memorySettings": {
     "loading": "Caricamento memorie...",
     "enableMemory": "Abilita memoria chatbot",

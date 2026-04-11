@@ -6,13 +6,15 @@ import VoiceRecordButton from './VoiceRecordButton';
 
 export interface ExtendedChatInputProps extends ChatInputProps {
   modelType?: 'base' | 'advanced';
+  isDisabled?: boolean;
 }
 
-const ChatInput: React.FC<ExtendedChatInputProps> = ({ 
-  onSendMessage, 
-  onSendVoiceMessage, 
-  style, 
-  modelType = 'base' 
+const ChatInput: React.FC<ExtendedChatInputProps> = ({
+  onSendMessage,
+  onSendVoiceMessage,
+  style,
+  modelType = 'base',
+  isDisabled = false,
 }) => {
   const [inputText, setInputText] = useState('');
   const [inputHeight, setInputHeight] = useState(44);
@@ -104,7 +106,7 @@ const ChatInput: React.FC<ExtendedChatInputProps> = ({
           onContentSizeChange={handleContentSizeChange}
           blurOnSubmit={false}
           textAlignVertical="top"
-          editable={!isRecording}
+          editable={!isRecording && !isDisabled}
         />
 
         <View style={styles.buttonContainer}>
@@ -119,13 +121,13 @@ const ChatInput: React.FC<ExtendedChatInputProps> = ({
           <TouchableOpacity
             style={[styles.sendButton, { height: inputHeight }]}
             onPress={handleSend}
-            disabled={inputText.trim() === '' || isRecording}
+            disabled={inputText.trim() === '' || isRecording || isDisabled}
             activeOpacity={0.6}
           >
             <MaterialIcons
               name="send"
               size={24}
-              color={(inputText.trim() === '' || isRecording) ? '#CCC' : '#007bff'}
+              color={(inputText.trim() === '' || isRecording || isDisabled) ? '#CCC' : '#007bff'}
             />
           </TouchableOpacity>
         </View>
