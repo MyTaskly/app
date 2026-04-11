@@ -16,6 +16,9 @@ import { StatusBar } from 'expo-status-bar';
 import Svg, { Path, Defs, RadialGradient, Stop } from "react-native-svg";
 import { Ionicons } from "@expo/vector-icons";
 import { useVoiceChat, ActiveTool } from '../../hooks/useVoiceChat';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+import { RootStackParamList } from '../../types';
 
 
 export interface VoiceChatModalProps {
@@ -226,6 +229,8 @@ const VoiceChatModal: React.FC<VoiceChatModalProps> = ({
   onOpenCalendar,
 }) => {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { t } = useTranslation();
   const {
     state,
     error,
@@ -237,6 +242,7 @@ const VoiceChatModal: React.FC<VoiceChatModalProps> = ({
     transcripts,
     activeTools,
     isMuted,
+    isVoiceQuotaExceeded,
     connect,
     disconnect,
     requestPermissions,
@@ -352,6 +358,32 @@ const VoiceChatModal: React.FC<VoiceChatModalProps> = ({
     ]).start(() => onClose());
     await disconnect();
   };
+
+  // Show quota-exceeded alert when voice quota is exhausted
+  useEffect(() => {
+    if (isVoiceQuotaExceeded && visible) {
+      const message = t('planUsage.voiceQuotaExceeded', { plan: 'FREE' });
+      Alert.alert(
+        t('planUsage.quotaZero'),
+        message,
+        [
+          {
+            text: t('common.buttons.cancel'),
+            style: 'cancel',
+            onPress: handleClose,
+          },
+          {
+            text: t('planUsage.goToPlan'),
+            onPress: () => {
+              handleClose();
+              navigation.navigate('Settings');
+            },
+          },
+        ],
+        { cancelable: false }
+      );
+    }
+  }, [isVoiceQuotaExceeded, visible]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Label testo stato
   const getStateLabel = (): string => {
