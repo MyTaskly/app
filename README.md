@@ -13,8 +13,6 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![GitHub Stars](https://img.shields.io/github/stars/Gabry848/MyTaskly-app.svg?style=social)](https://github.com/Gabry848/MyTaskly-app)
 
-<a href="https://www.producthunt.com/products/mytaskly?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-mytaskly"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1121067&theme=light&t=1776075406353" alt="MyTaskly on Product Hunt" height="54"/></a>
-
 [Website](https://mytasklyapp.com) • [Download](#-download) • [Features](#features) • [Screenshots](#screenshots) • [Telegram Bot](#-telegram-bot) • [MCP](#-mcp-integration) • [Contributing](#contributing) • [License](LICENSE.md)
 
 </div>
