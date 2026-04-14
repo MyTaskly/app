@@ -440,6 +440,7 @@ const editStyles = StyleSheet.create({
   clearDateIconButton: {
     alignSelf: "center" as const,
     paddingLeft: 8,
+    marginBottom: 20,
   },
 });
 
