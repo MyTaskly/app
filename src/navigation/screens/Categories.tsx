@@ -92,14 +92,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   header: {
-    paddingTop: 20,
     paddingHorizontal: 15,
     paddingBottom: 0,
     flexDirection: "row",
     alignItems: "flex-start",
   },
   mainTitle: {
-    paddingTop: 10,
     fontSize: 30,
     fontWeight: "200", // Stesso peso di Home20
     color: "#000000",
@@ -107,6 +105,8 @@ const styles = StyleSheet.create({
     fontFamily: "System",
     letterSpacing: -1.5,
     marginBottom: 0,
+    paddingBottom: 5,
+
   },
   content: {
     flex: 1,
