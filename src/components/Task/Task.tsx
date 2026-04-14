@@ -193,10 +193,18 @@ const Task = ({
         priority: editedTaskData.priority,
         status: editedTaskData.status,
         duration_minutes: editedTaskData.duration_minutes,
-        completed: editedTaskData.status === "Completato" ? true : task.completed
+        completed: editedTaskData.status === "Completato" ? true : task.completed,
+        is_recurring: editedTaskData.is_recurring,
+        recurrence_pattern: editedTaskData.recurrence_pattern,
+        recurrence_interval: editedTaskData.recurrence_interval,
+        recurrence_days_of_week: editedTaskData.recurrence_days_of_week,
+        recurrence_day_of_month: editedTaskData.recurrence_day_of_month,
+        recurrence_end_type: editedTaskData.recurrence_end_type,
+        recurrence_end_date: editedTaskData.recurrence_end_date,
+        recurrence_end_count: editedTaskData.recurrence_end_count,
       };
-      
-      const hasChanged = 
+
+      const hasChanged =
         task.title !== updatedTask.title ||
         task.description !== updatedTask.description ||
         task.start_time !== updatedTask.start_time ||
@@ -204,7 +212,10 @@ const Task = ({
         task.priority !== updatedTask.priority ||
         task.status !== updatedTask.status ||
         task.completed !== updatedTask.completed ||
-        task.duration_minutes !== updatedTask.duration_minutes;
+        task.duration_minutes !== updatedTask.duration_minutes ||
+        task.is_recurring !== updatedTask.is_recurring ||
+        task.recurrence_pattern !== updatedTask.recurrence_pattern ||
+        task.recurrence_interval !== updatedTask.recurrence_interval;
       
       if (hasChanged) {
         console.log("Salvataggio modifiche per task:", updatedTask);

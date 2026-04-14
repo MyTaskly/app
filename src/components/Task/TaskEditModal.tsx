@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Modal, TextInput, ScrollView, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Modal, TextInput, ScrollView, Alert, Switch } from "react-native";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { styles } from "./TaskStyles";
 import { PrioritySelector, StatusSelector, DatePickerButton, TimePickerButton } from "./FormComponents";
+import { RecurrenceConfig } from "./RecurrenceConfig";
+import { RecurrenceConfig as RecurrenceConfigType } from "../../types/recurringTask";
 
 const DURATION_PRESETS = [
   { label: "15 min", value: 15 },
@@ -12,6 +14,21 @@ const DURATION_PRESETS = [
   { label: "2 ore", value: 120 },
   { label: "4 ore", value: 240 },
 ];
+
+const recurrenceToggleRow = {
+  flexDirection: "row" as const,
+  alignItems: "center" as const,
+  justifyContent: "space-between" as const,
+  marginTop: 16,
+  marginBottom: 8,
+  paddingVertical: 10,
+  paddingHorizontal: 4,
+  borderTopWidth: 1,
+  borderTopColor: "#f0f0f0",
+};
+const recurrenceToggleLabelRow = { flexDirection: "row" as const, alignItems: "center" as const };
+const recurrenceToggleLabel = { fontSize: 15, fontWeight: "500" as const, color: "#000000", fontFamily: "System" };
+const recurrenceConfigWrapper = { marginTop: 4, paddingTop: 8, borderTopWidth: 1, borderTopColor: "#f0f0f0" };
 
 // Componente per il modal di modifica
 const TaskEditModal = ({ 
@@ -35,6 +52,12 @@ const TaskEditModal = ({
   const [pickerMode, setPickerMode] = useState('date');
   const [dateType, setDateType] = useState('end'); // 'start' o 'end'
   const [customDuration, setCustomDuration] = useState<string>("");
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrenceConfig, setRecurrenceConfig] = useState<RecurrenceConfigType>({
+    pattern: 'daily',
+    interval: 1,
+    end_type: 'never',
+  });
 
   // Quando il modale diventa visibile, inizializza i campi
   useEffect(() => {
@@ -49,6 +72,22 @@ const TaskEditModal = ({
         duration_minutes: task.duration_minutes ?? null,
       });
       setCustomDuration(task.duration_minutes ? String(task.duration_minutes) : "");
+
+      const taskIsRecurring = !!(task.is_recurring);
+      setIsRecurring(taskIsRecurring);
+      if (taskIsRecurring) {
+        setRecurrenceConfig({
+          pattern: (task.recurrence_pattern as any) || 'daily',
+          interval: task.recurrence_interval || 1,
+          days_of_week: task.recurrence_days_of_week,
+          day_of_month: task.recurrence_day_of_month,
+          end_type: (task.recurrence_end_type as any) || 'never',
+          end_date: task.recurrence_end_date,
+          end_count: task.recurrence_end_count,
+        });
+      } else {
+        setRecurrenceConfig({ pattern: 'daily', interval: 1, end_type: 'never' });
+      }
     }
   }, [visible, task]);
 
@@ -95,8 +134,30 @@ const TaskEditModal = ({
       Alert.alert("Errore", "Il titolo è obbligatorio");
       return;
     }
-    
-    onSave(editedTask);
+
+    const taskData: any = { ...editedTask };
+
+    if (isRecurring) {
+      taskData.is_recurring = true;
+      taskData.recurrence_pattern = recurrenceConfig.pattern;
+      taskData.recurrence_interval = recurrenceConfig.interval;
+      taskData.recurrence_days_of_week = recurrenceConfig.days_of_week;
+      taskData.recurrence_day_of_month = recurrenceConfig.day_of_month;
+      taskData.recurrence_end_type = recurrenceConfig.end_type;
+      taskData.recurrence_end_date = recurrenceConfig.end_date;
+      taskData.recurrence_end_count = recurrenceConfig.end_count;
+    } else {
+      taskData.is_recurring = false;
+      taskData.recurrence_pattern = undefined;
+      taskData.recurrence_interval = undefined;
+      taskData.recurrence_days_of_week = undefined;
+      taskData.recurrence_day_of_month = undefined;
+      taskData.recurrence_end_type = undefined;
+      taskData.recurrence_end_date = undefined;
+      taskData.recurrence_end_count = undefined;
+    }
+
+    onSave(taskData);
   };
 
   return (
@@ -115,7 +176,7 @@ const TaskEditModal = ({
             </TouchableOpacity>
           </View>
           
-          <ScrollView style={styles.editModalContent}>
+          <ScrollView style={[styles.editModalContent, { flex: 1 }]} contentContainerStyle={{ paddingBottom: 16 }}>
             <Text style={styles.inputLabel}>Titolo *</Text>
             <TextInput
               style={styles.input}
@@ -264,6 +325,25 @@ const TaskEditModal = ({
                 </TouchableOpacity>
               )}
             </View>
+
+            {/* Ricorrenza */}
+            <View style={recurrenceToggleRow}>
+              <View style={recurrenceToggleLabelRow}>
+                <Ionicons name="repeat" size={18} color="#007AFF" style={{ marginRight: 6 }} />
+                <Text style={recurrenceToggleLabel}>Task ricorrente</Text>
+              </View>
+              <Switch
+                value={isRecurring}
+                onValueChange={setIsRecurring}
+                trackColor={{ false: "#e0e0e0", true: "#007AFF" }}
+                thumbColor="#ffffff"
+              />
+            </View>
+            {isRecurring && (
+              <View style={recurrenceConfigWrapper}>
+                <RecurrenceConfig value={recurrenceConfig} onChange={setRecurrenceConfig} />
+              </View>
+            )}
           </ScrollView>
           
           <View style={styles.editModalFooter}>

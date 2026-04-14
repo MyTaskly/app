@@ -44,7 +44,11 @@ const TaskHeader = ({
 
       {/* Giorni rimanenti e durata (spostato a destra) */}
       <View style={styles.daysRemainingContainer}>
-        <DaysRemaining endDate={task.end_time} />
+        <DaysRemaining
+          endDate={task.end_time}
+          isRecurring={task.is_recurring || task.is_generated_instance}
+          nextOccurrence={task.next_occurrence}
+        />
         <DurationDisplay durationMinutes={task.duration_minutes} />
       </View>
     </View>

@@ -76,10 +76,30 @@ export const DurationDisplay = ({ durationMinutes }: { durationMinutes?: number 
 };
 
 // Componente per visualizzare i giorni rimanenti
-export const DaysRemaining = ({ endDate }) => {
+export const DaysRemaining = ({
+  endDate,
+  isRecurring = false,
+  nextOccurrence,
+}: {
+  endDate?: string;
+  isRecurring?: boolean;
+  nextOccurrence?: string;
+}) => {
+  if (isRecurring) {
+    const dateToUse = nextOccurrence || endDate;
+    const text = dateToUse ? getDaysRemainingText(dateToUse) : "Ricorrente";
+    const color = dateToUse ? getDaysRemainingColor(dateToUse) : "#007AFF";
+    return (
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Ionicons name="time-outline" size={12} color={color} style={{ marginRight: 3 }} />
+        <Text style={[styles.daysRemaining, { color }]}>{text}</Text>
+      </View>
+    );
+  }
+
   const daysRemainingText = getDaysRemainingText(endDate);
   const daysRemainingColor = getDaysRemainingColor(endDate);
-  
+
   return (
     <Text style={[styles.daysRemaining, { color: daysRemainingColor }]}>
       {daysRemainingText}

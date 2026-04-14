@@ -170,6 +170,33 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onPress }) => {
             </Text>
           </View>
         )}
+
+        {/* Date / next occurrence */}
+        {(() => {
+          const isRecurring = task.is_recurring || task.is_generated_instance;
+          if (isRecurring) {
+            const dateString = task.next_occurrence || task.end_time;
+            const label = dateString
+              ? formatTaskTime(task.start_time, task.end_time, task.next_occurrence)
+              : 'Ricorrente';
+            return (
+              <View style={styles.dateRow}>
+                <Ionicons name="time-outline" size={13} color="#007AFF" />
+                <Text style={[styles.dateRowText, styles.dateRowRecurring]}>{label}</Text>
+              </View>
+            );
+          }
+          const dateString = task.end_time;
+          const label = dateString
+            ? formatTaskTime(task.start_time, task.end_time)
+            : 'Nessuna scadenza';
+          return (
+            <View style={styles.dateRow}>
+              <Ionicons name="calendar-outline" size={13} color="#999999" />
+              <Text style={[styles.dateRowText, styles.dateRowNone]}>{label}</Text>
+            </View>
+          );
+        })()}
       </View>
     </TouchableOpacity>
   );
@@ -278,6 +305,23 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     fontFamily: "System",
     fontWeight: "400",
+  },
+  dateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+    gap: 4,
+  },
+  dateRowText: {
+    fontSize: 12,
+    fontFamily: "System",
+    fontWeight: "400",
+  },
+  dateRowRecurring: {
+    color: "#007AFF",
+  },
+  dateRowNone: {
+    color: "#999999",
   },
 });
 
