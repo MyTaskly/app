@@ -245,7 +245,7 @@ const TaskEditModal = ({
             {/* Scadenza semplice */}
             {deadlineType === 'simple' && (
               <View style={editStyles.deadlineContent}>
-                <View style={[styles.dateTimeContainer, { marginBottom: 0 }]}>
+                <View style={[styles.dateTimeContainer, { marginBottom: 0, alignItems: "center" }]}>
                   <View style={styles.dateButton}>
                     <DatePickerButton
                       value={editedTask.end_time}
@@ -260,15 +260,15 @@ const TaskEditModal = ({
                       placeholder="Ora"
                     />
                   </View>
+                  {editedTask.end_time && (
+                    <TouchableOpacity
+                      style={editStyles.clearDateIconButton}
+                      onPress={() => setEditedTask({...editedTask, end_time: null})}
+                    >
+                      <Ionicons name="close-circle" size={22} color="#cccccc" />
+                    </TouchableOpacity>
+                  )}
                 </View>
-                {editedTask.end_time && (
-                  <TouchableOpacity
-                    style={[styles.clearDateButton, { marginTop: 8, marginBottom: 0 }]}
-                    onPress={() => setEditedTask({...editedTask, end_time: null})}
-                  >
-                    <Text style={styles.clearDateText}>Rimuovi scadenza</Text>
-                  </TouchableOpacity>
-                )}
               </View>
             )}
 
@@ -436,6 +436,11 @@ const editStyles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "#e1e5e9",
+  },
+  clearDateIconButton: {
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+    paddingLeft: 8,
   },
 });
 

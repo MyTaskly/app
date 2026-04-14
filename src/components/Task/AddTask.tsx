@@ -447,23 +447,23 @@ const AddTask: React.FC<AddTaskProps> = ({
                       color={selectedDateTime ? "#666" : "#ccc"}
                     />
                   </TouchableOpacity>
+
+                  {selectedDateTime && (
+                    <TouchableOpacity
+                      style={styles.clearDateIconButton}
+                      onPress={() => {
+                        setSelectedDateTime(null);
+                        setDueDate("");
+                        setDateError("");
+                      }}
+                    >
+                      <Ionicons name="close-circle" size={22} color="#cccccc" />
+                    </TouchableOpacity>
+                  )}
                 </View>
 
-                {selectedDateTime && (
-                  <TouchableOpacity
-                    style={[styles.clearDateButton, { marginTop: 8, marginBottom: 0 }]}
-                    onPress={() => {
-                      setSelectedDateTime(null);
-                      setDueDate("");
-                      setDateError("");
-                    }}
-                  >
-                    <Text style={styles.clearDateText}>Rimuovi scadenza</Text>
-                  </TouchableOpacity>
-                )}
-
                 {dateError ? (
-                  <Text style={styles.errorText}>{dateError}</Text>
+                  <Text style={[styles.errorText, { marginTop: 8, marginBottom: 0 }]}>{dateError}</Text>
                 ) : null}
               </View>
             )}
@@ -826,18 +826,10 @@ const styles = StyleSheet.create({
   disabledText: {
     color: "#ccc",
   },
-  clearDateButton: {
-    alignSelf: "center",
-    marginTop: -12,
-    marginBottom: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  clearDateText: {
-    color: "#FF5252",
-    fontSize: 14,
-    fontFamily: "System",
-    textDecorationLine: "underline",
+  clearDateIconButton: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingLeft: 8,
   },
   deadlineTypeContainer: {
     flexDirection: "row",
