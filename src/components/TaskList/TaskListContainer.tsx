@@ -361,12 +361,6 @@ export const TaskListContainer = ({
       const result = await taskService.addTask(taskData);
 
       if (result) {
-        if (recurrence) {
-          Alert.alert(
-            t('success') || "Success",
-            t('recurring.taskCreated') || "Recurring task created successfully!"
-          );
-        }
         // Reload tasks to show the new task
         fetchTasks();
       }
