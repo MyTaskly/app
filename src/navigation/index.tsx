@@ -37,6 +37,7 @@ import GoogleCalendarScreen from "./screens/GoogleCalendar";
 import NotificationSettingsScreen from "./screens/NotificationSettings";
 import MemorySettingsScreen from "./screens/MemorySettings";
 import AISettingsScreen from "./screens/AISettings";
+import RecurringTasksScreen from "./screens/RecurringTasksScreen";
 import CalendarScreen from "./screens/Calendar";
 import NotificationDebugScreen from "./screens/NotificationDebug";
 import BugReportScreen from "./screens/BugReport";
@@ -84,6 +85,7 @@ export type RootStackParamList = {
   NotificationSettings: undefined;
   MemorySettings: undefined;
   AISettings: undefined;
+  RecurringTasks: undefined;
 };
 
 // Definizione del tipo per le route dei Tab
@@ -512,6 +514,11 @@ function AppStack() {
           name="AISettings"
           component={AISettingsScreen}
           options={{ title: t('navigation.screens.aiSettings') }}
+        />
+        <Stack.Screen
+          name="RecurringTasks"
+          component={RecurringTasksScreen}
+          options={{ title: 'Task ricorrenti' }}
         />
         <Stack.Screen name="NotFound" component={NotFoundScreen} />
       </Stack.Navigator>
