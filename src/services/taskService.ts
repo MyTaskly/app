@@ -762,7 +762,15 @@ export async function addTask(task: Task) {
     
     // Genera un ID temporaneo per il task locale
     const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const tempTask = { ...data, id: tempId, task_id: tempId };
+    // Per task ricorrenti, espandi i campi ricorrenza al livello top-level (da data.recurrence nested)
+    const tempRecurringFields = data.is_recurring && data.recurrence ? {
+      recurrence_pattern: data.recurrence.pattern,
+      recurrence_interval: data.recurrence.interval ?? 1,
+      recurrence_end_type: data.recurrence.end_type || 'never',
+      recurrence_days_of_week: data.recurrence.days_of_week,
+      recurrence_day_of_month: data.recurrence.day_of_month,
+    } : {};
+    const tempTask = { ...data, ...tempRecurringFields, id: tempId, task_id: tempId };
     
     // Aggiungi immediatamente alla cache locale per UI reattiva
     await getServices().cacheService.updateTaskInCache(tempTask);
@@ -785,9 +793,23 @@ export async function addTask(task: Task) {
       
       // Aggiorna la cache con l'ID reale del server SENZA rimuovere il task temporaneo
       if (response.data && response.data.task_id) {
+        // Se il task era ricorrente, garantiamo che i campi ricorrenza siano preservati
+        // anche se il server non li restituisce nella response (o li restituisce null)
+        const recurringOverrides = data.is_recurring ? {
+          is_recurring: true,
+          recurrence_pattern: response.data.recurrence_pattern || data.recurrence?.pattern,
+          recurrence_interval: response.data.recurrence_interval ?? data.recurrence?.interval ?? 1,
+          recurrence_end_type: response.data.recurrence_end_type || data.recurrence?.end_type || 'never',
+          recurrence_days_of_week: response.data.recurrence_days_of_week || data.recurrence?.days_of_week,
+          recurrence_day_of_month: response.data.recurrence_day_of_month || data.recurrence?.day_of_month,
+          recurrence_end_date: response.data.recurrence_end_date || data.recurrence?.end_date,
+          recurrence_end_count: response.data.recurrence_end_count || data.recurrence?.end_count,
+        } : {};
+
         const serverTask = {
           ...data, // Usa i dati originali puliti
           ...response.data, // Sovrascrivi con i dati del server
+          ...recurringOverrides, // Ripristina i campi ricorrenza se il server non li restituisce
           id: response.data.task_id, // Usa l'ID del server
           task_id: response.data.task_id, // Assicurati che anche task_id sia impostato
           tempId: tempId // Mantieni il riferimento al temp ID per la cache
