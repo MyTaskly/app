@@ -325,6 +325,7 @@ export const TaskListContainer = ({
         end_time: dueDate ? new Date(dueDate).toISOString() : undefined,
         priority: priorityString,
         category_id: parseInt(categoryId as string) || 0,
+        category_name: categoryName,
         status: "In sospeso",
       };
 

@@ -727,10 +727,11 @@ export async function addTask(task: Task) {
       data.duration_minutes = task.duration_minutes;
     }
 
-    // Usa category_id se disponibile, altrimenti fallback su category_name
+    // Includi category_id e category_name se disponibili (entrambi necessari per cache e API)
     if (task.category_id !== undefined) {
       data.category_id = task.category_id;
-    } else if (task.category_name !== undefined) {
+    }
+    if (task.category_name !== undefined) {
       data.category_name = task.category_name;
     }
 

@@ -206,12 +206,13 @@ class TaskCacheService {
         });
       }
       
-      // Verifica task con category_name problematici (log solo warning)
-      const problematicTasks = tasks.filter(task => 
-        task.category_name === undefined || task.category_name === "undefined"
+      // Verifica task senza categoria (né category_name né category_id)
+      const problematicTasks = tasks.filter(task =>
+        (!task.category_name || task.category_name === 'undefined') &&
+        (task.category_id === undefined || task.category_id === null)
       );
       if (problematicTasks.length > 0) {
-        console.warn(`[CACHE] ${problematicTasks.length} task hanno category_name undefined`);
+        console.warn(`[CACHE] ${problematicTasks.length} task senza categoria`);
       }
       
       const cache: TasksCache = {
@@ -242,9 +243,10 @@ class TaskCacheService {
       const optimisticFlag = (updatedTask as any).isOptimistic ? '🔄 OPTIMISTIC' : '✅ CONFIRMED';
       console.log(`[CACHE] ${optimisticFlag} Aggiornando task in cache: "${updatedTask.title}", categoria="${updatedTask.category_name}", status="${updatedTask.status}"`);
 
-      // Warn se il task ha category_name undefined
-      if (!updatedTask.category_name || updatedTask.category_name === 'undefined') {
-        console.warn(`[CACHE] ⚠️ ATTENZIONE: Tentativo di salvare task "${updatedTask.title}" con category_name undefined!`);
+      // Warn se il task non ha né category_name né category_id
+      if ((!updatedTask.category_name || updatedTask.category_name === 'undefined') &&
+          (updatedTask.category_id === undefined || updatedTask.category_id === null)) {
+        console.warn(`[CACHE] ⚠️ ATTENZIONE: Tentativo di salvare task "${updatedTask.title}" senza categoria!`);
       }
 
       const cachedTasks = await this.getCachedTasks();
@@ -444,12 +446,14 @@ class TaskCacheService {
   async checkAndFixCorruptedCache(): Promise<boolean> {
     try {
       const cachedTasks = await this.getCachedTasks();
-      const corruptedTasks = cachedTasks.filter(task => 
-        !task.category_name || task.category_name === 'undefined'
+      // Un task è corrotto solo se manca sia category_name sia category_id
+      const corruptedTasks = cachedTasks.filter(task =>
+        (!task.category_name || task.category_name === 'undefined') &&
+        (task.category_id === undefined || task.category_id === null)
       );
-      
+
       if (corruptedTasks.length > 0) {
-        console.log(`[CACHE] 🔧 Trovati ${corruptedTasks.length} task con category_name corrotto, pulizia cache...`);
+        console.log(`[CACHE] 🔧 Trovati ${corruptedTasks.length} task senza categoria, pulizia cache...`);
         await this.clearCache();
         return true; // Indica che la cache è stata pulita
       }
