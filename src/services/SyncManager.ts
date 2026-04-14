@@ -239,24 +239,50 @@ class SyncManager {
 
     try {
       console.log('[SYNC] 🔄 Aggiornamento dati dal server...');
-      
+
       // Carica tasks e categorie dal server
       const { getTasksFromAPI, getCategoriesFromAPI } = await getTaskServiceFunctions();
-      const [tasks, categories] = await Promise.all([
+      const [serverTasks, categories] = await Promise.all([
         getTasksFromAPI(),
         getCategoriesFromAPI()
       ]);
 
-      console.log(`[SYNC] 📡 Ricevuti dal server: ${(tasks || []).length} task, ${(categories || []).length} categorie`);
+      console.log(`[SYNC] 📡 Ricevuti dal server: ${(serverTasks || []).length} task, ${(categories || []).length} categorie`);
+
+      // Merge con la cache esistente per preservare i campi di ricorrenza che il server
+      // potrebbe non includere nel list endpoint (is_recurring, recurrence_pattern, ecc.)
+      const existingTasks = await this.cacheService!.getCachedTasks();
+      const existingById = new Map(
+        existingTasks.map(t => [String(t.task_id || t.id), t])
+      );
+
+      const mergedTasks = (serverTasks || []).map((serverTask: any) => {
+        const taskId = String(serverTask.task_id || serverTask.id);
+        const existing = existingById.get(taskId);
+        if (!existing) return serverTask;
+
+        return {
+          ...serverTask,
+          // Preserva i campi ricorrenza se il server non li restituisce (undefined/null)
+          is_recurring: serverTask.is_recurring ?? existing.is_recurring,
+          recurrence_pattern: serverTask.recurrence_pattern ?? existing.recurrence_pattern,
+          recurrence_interval: serverTask.recurrence_interval ?? existing.recurrence_interval,
+          recurrence_end_type: serverTask.recurrence_end_type ?? existing.recurrence_end_type,
+          recurrence_days_of_week: serverTask.recurrence_days_of_week ?? existing.recurrence_days_of_week,
+          recurrence_day_of_month: serverTask.recurrence_day_of_month ?? existing.recurrence_day_of_month,
+          recurrence_end_date: serverTask.recurrence_end_date ?? existing.recurrence_end_date,
+          recurrence_end_count: serverTask.recurrence_end_count ?? existing.recurrence_end_count,
+        };
+      });
 
       // Salva nella cache (questo triggerà anche la rimozione dei task fantasma)
-      await this.cacheService!.saveTasks(tasks || [], categories || []);
-      
-      console.log(`[SYNC] ✅ Sincronizzazione completata: ${(tasks || []).length} task e ${(categories || []).length} categorie`);
-      
+      await this.cacheService!.saveTasks(mergedTasks, categories || []);
+
+      console.log(`[SYNC] ✅ Sincronizzazione completata: ${mergedTasks.length} task e ${(categories || []).length} categorie`);
+
       // Emetti evento di sincronizzazione completata
       console.log('[SYNC] 📢 Emitting TASKS_SYNCED event');
-      emitTasksSynced(tasks || [], categories || []);
+      emitTasksSynced(mergedTasks, categories || []);
     } catch (error) {
       console.error('[SYNC] ❌ Errore nell\'aggiornamento dati dal server:', error);
       throw error;

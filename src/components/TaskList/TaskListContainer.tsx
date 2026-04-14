@@ -11,6 +11,7 @@ import { TaskSection } from './TaskSection';
 import { AddTaskButton } from './AddTaskButton';
 import { filterTasksByDay } from './TaskUtils';
 import AddTask from '../Task/AddTask';
+import { recurringTaskService, RecurringTask, CreateRecurringTaskPayload } from '../../services/recurringTaskService';
 
 export interface TaskListContainerProps {
   categoryName: string;
@@ -107,27 +108,65 @@ export const TaskListContainer = ({
     }
   };
 
+  // Normalizza un RecurringTask (da /tasks/recurring/) al formato TaskType usato nella lista
+  const normalizeRecurringTask = useCallback((rt: RecurringTask): TaskType => ({
+    id: `recurring_${rt.id}`,
+    task_id: rt.id,
+    recurring_task_id: rt.id,
+    title: rt.title,
+    description: rt.description || '',
+    start_time: rt.start_time,
+    end_time: rt.next_occurrence || undefined,
+    priority: rt.priority,
+    status: 'In sospeso',
+    category_id: rt.category_id ?? undefined,
+    category_name: categoryName,
+    is_recurring: true,
+    is_active: rt.is_active,
+    recurrence_pattern: rt.recurrence_pattern ?? undefined,
+    recurrence_interval: rt.interval,
+    recurrence_days_of_week: rt.days_of_week ?? undefined,
+    recurrence_end_type: rt.end_type,
+    recurrence_end_date: rt.end_date ?? undefined,
+    recurrence_end_count: rt.end_count ?? undefined,
+    next_occurrence: rt.next_occurrence ?? undefined,
+    last_completed_at: rt.last_completed_at ?? undefined,
+    completed: false,
+  }), [categoryName]);
+
   const fetchTasks = useCallback(async () => {
     try {
-      const data = await taskService.getTasks(categoryId);
+      // Fetch task normali e task ricorrenti in parallelo
+      const [data, allRecurring] = await Promise.all([
+        taskService.getTasks(categoryId),
+        recurringTaskService.listRecurringTasks({ activeOnly: false }).catch(() => [] as RecurringTask[]),
+      ]);
 
-      // IMPORTANTE: Normalizza i task per assicurarsi che abbiano sempre un id valido
-      const normalizedTasks = data.map(task => ({
+      // Filtra i task ricorrenti per questa categoria
+      const categoryIdNum = parseInt(categoryId);
+      const recurringForCategory = allRecurring.filter(rt =>
+        rt.category_id != null && rt.category_id === categoryIdNum
+      );
+
+      // Normalizza i task normali
+      const normalizedRegular = data.map(task => ({
         ...task,
-        id: task.id || task.task_id,  // Assicura che id sia sempre presente
-        task_id: Number(task.task_id || task.id)  // Assicura che task_id sia sempre presente come numero
+        id: task.id || task.task_id,
+        task_id: Number(task.task_id || task.id),
       }));
 
-      setTasks(normalizedTasks);
+      // Normalizza i task ricorrenti
+      const normalizedRecurring = recurringForCategory.map(normalizeRecurringTask);
 
-      // Update global reference
-      globalTasksRef.tasks[categoryName] = normalizedTasks;
+      const allTasks = [...normalizedRegular, ...normalizedRecurring];
+      setTasks(allTasks);
+      globalTasksRef.tasks[categoryName] = allTasks;
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching tasks:", error);
       setIsLoading(false);
     }
-  }, [categoryId, categoryName, taskService]);
+  }, [categoryId, categoryName, taskService, normalizeRecurringTask]);
 
   useEffect(() => {
     fetchTasks();
@@ -318,6 +357,28 @@ export const TaskListContainer = ({
     const priorityString = priority === 1 ? "Bassa" : priority === 2 ? "Media" : "Alta";
 
     try {
+      if (recurrence) {
+        // Task ricorrente → endpoint dedicato POST /tasks/recurring/
+        const catId = parseInt(categoryId as string) || null;
+        const payload: CreateRecurringTaskPayload = {
+          title,
+          description: description || null,
+          start_time: dueDate ? new Date(dueDate).toISOString() : new Date().toISOString(),
+          priority: priorityString as any,
+          category_id: catId,
+          recurrence_pattern: recurrence.pattern,
+          interval: recurrence.interval || 1,
+          days_of_week: recurrence.days_of_week,
+          end_type: recurrence.end_type || 'never',
+          end_date: recurrence.end_date || null,
+          end_count: recurrence.end_count || null,
+        };
+        await recurringTaskService.createRecurringTask(payload);
+        fetchTasks();
+        return;
+      }
+
+      // Task normale → endpoint standard POST /tasks/
       const taskData: any = {
         title,
         description: description || "",
@@ -329,40 +390,12 @@ export const TaskListContainer = ({
         status: "In sospeso",
       };
 
-      // Add duration_minutes if provided (API v2.1.0)
       if (durationMinutes !== undefined && durationMinutes !== null) {
         taskData.duration_minutes = durationMinutes;
       }
 
-      // Add recurring task fields if this is a recurring task (NEW API v2.2.0)
-      if (recurrence) {
-        taskData.is_recurring = true;
-        taskData.recurrence_pattern = recurrence.pattern;
-        taskData.recurrence_interval = recurrence.interval || 1;
-        taskData.recurrence_end_type = recurrence.end_type || "never";
-
-        // Add pattern-specific fields
-        if (recurrence.pattern === "weekly" && recurrence.days_of_week) {
-          taskData.recurrence_days_of_week = recurrence.days_of_week;
-        }
-        if (recurrence.pattern === "monthly" && recurrence.day_of_month) {
-          taskData.recurrence_day_of_month = recurrence.day_of_month;
-        }
-
-        // Add end-type-specific fields
-        if (recurrence.end_type === "on_date" && recurrence.end_date) {
-          taskData.recurrence_end_date = recurrence.end_date;
-        }
-        if (recurrence.end_type === "after_count" && recurrence.end_count) {
-          taskData.recurrence_end_count = recurrence.end_count;
-        }
-      }
-
-      // Use the standard addTask service (works for both regular and recurring tasks)
       const result = await taskService.addTask(taskData);
-
       if (result) {
-        // Reload tasks to show the new task
         fetchTasks();
       }
     } catch (error) {

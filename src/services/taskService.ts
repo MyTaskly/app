@@ -160,15 +160,30 @@ export async function getTasks(categoryIdentifier?: string | number, useCache: b
 
         // Salva i task ricevuti in cache per uso futuro
         if (useCache && response.data && Array.isArray(response.data)) {
-          const tasksToCache = response.data.map((task: Task) => ({
-            ...task,
-            id: task.task_id || task.id,
-            task_id: task.task_id || task.id
-          }));
-
-          // Carica la cache esistente e aggiorna solo i task di questa categoria
           const { cacheService } = getServices();
           const existingTasks = await cacheService.getCachedTasks();
+          const existingById = new Map(existingTasks.map(t => [String(t.task_id || t.id), t]));
+
+          const tasksToCache = response.data.map((task: Task) => {
+            const taskId = String(task.task_id || task.id);
+            const existing = existingById.get(taskId);
+            const base = { ...task, id: task.task_id || task.id, task_id: task.task_id || task.id };
+            if (!existing) return base;
+            // Preserva i campi ricorrenza se il server non li restituisce
+            return {
+              ...base,
+              is_recurring: (task as any).is_recurring ?? existing.is_recurring,
+              recurrence_pattern: (task as any).recurrence_pattern ?? existing.recurrence_pattern,
+              recurrence_interval: (task as any).recurrence_interval ?? existing.recurrence_interval,
+              recurrence_end_type: (task as any).recurrence_end_type ?? existing.recurrence_end_type,
+              recurrence_days_of_week: (task as any).recurrence_days_of_week ?? existing.recurrence_days_of_week,
+              recurrence_day_of_month: (task as any).recurrence_day_of_month ?? existing.recurrence_day_of_month,
+              recurrence_end_date: (task as any).recurrence_end_date ?? existing.recurrence_end_date,
+              recurrence_end_count: (task as any).recurrence_end_count ?? existing.recurrence_end_count,
+            };
+          });
+
+          // Carica la cache esistente e aggiorna solo i task di questa categoria
           const otherCategoryTasks = existingTasks.filter(t =>
             t.category_id !== categoryIdentifier && t.category_id?.toString() !== categoryIdentifier.toString()
           );
