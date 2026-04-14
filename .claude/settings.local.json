@@ -65,7 +65,9 @@
       "Bash(openspec instructions:*)",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(f'Progress: {d[\\\\\"progress\\\\\"][\\\\\"complete\\\\\"]}/{d[\\\\\"progress\\\\\"][\\\\\"total\\\\\"]}'\\); [print\\(f'  [{\\\\\"x\\\\\" if t[\\\\\"done\\\\\"] else \\\\\" \\\\\"}] {t[\\\\\"description\\\\\"][:80]}'\\) for t in d['tasks']]\")",
       "Bash(git checkout:*)",
-      "Bash(gh pr:*)"
+      "Bash(gh pr:*)",
+      "Bash(ls /home/gabry848/Documenti/MyTaskly/MyTaskly-app/src/components/*.tsx)",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
