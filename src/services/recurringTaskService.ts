@@ -1,337 +1,125 @@
-import axios from "./axiosInterceptor";
-import { checkAndRefreshAuth } from "./authService";
-import {
-  RecurrenceConfig,
-  RecurringTemplate,
-  CreateRecurringTaskResponse,
-  GetTemplatesResponse,
-  GetInstancesResponse,
-  RecurringTask,
-} from "../types/recurringTask";
+import axiosInstance from './axiosInstance';
 
-/**
- * Task data for creating a recurring task
- */
-export interface CreateRecurringTaskData {
+// ── Types ──────────────────────────────────────────────────────────────────
+
+export type RecurrencePattern = 'daily' | 'weekly' | 'monthly';
+export type EndType = 'never' | 'after_count' | 'on_date';
+export type Priority = 'Bassa' | 'Media' | 'Alta';
+
+export interface RecurringTask {
+  id: number;
+  user_id: number;
+  category_id: number | null;
   title: string;
-  description?: string;
+  description: string | null;
   start_time: string;
-  end_time?: string;
-  priority?: string;
-  category_id: number;
+  priority: Priority;
+  interval_minutes: number | null;
+  recurrence_pattern: RecurrencePattern | null;
+  interval: number;
+  days_of_week: number[] | null;
+  end_type: EndType;
+  end_date: string | null;
+  end_count: number | null;
+  occurrence_count: number;
+  next_occurrence: string | null;
+  last_completed_at: string | null;
+  is_active: boolean;
+  google_calendar_event_id: string | null;
+  extra_config: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
 }
 
-/**
- * API Response wrapper
- */
-interface ApiResponse<T> {
-  success: boolean;
-  message?: string;
-  data?: T;
-  error?: any;
+export interface CreateRecurringTaskPayload {
+  title: string;
+  description?: string | null;
+  start_time: string;
+  priority?: Priority;
+  category_id?: number | null;
+  // Use exactly ONE of the two below:
+  interval_minutes?: number;
+  recurrence_pattern?: RecurrencePattern;
+  interval?: number;
+  days_of_week?: number[];
+  end_type?: EndType;
+  end_count?: number | null;
+  end_date?: string | null;
+  extra_config?: Record<string, unknown> | null;
 }
 
-/**
- * Creates a new recurring task with template and instances
- * @param taskData - Task details (title, description, times, priority, category)
- * @param recurrence - Recurrence configuration
- * @returns Response with template and base task IDs
- */
-export async function createRecurringTask(
-  taskData: CreateRecurringTaskData,
-  recurrence: RecurrenceConfig
-): Promise<ApiResponse<CreateRecurringTaskResponse>> {
-  try {
-    const authStatus = await checkAndRefreshAuth();
-    if (!authStatus.isAuthenticated) {
-      console.log(
-        "[RECURRING_TASK_SERVICE] createRecurringTask: user not authenticated"
-      );
-      return {
-        success: false,
-        message: "Authentication token invalid",
-      };
+export interface UpdateRecurringTaskPayload {
+  title?: string;
+  description?: string | null;
+  start_time?: string;
+  priority?: Priority;
+  category_id?: number | null;
+  interval_minutes?: number | null;
+  recurrence_pattern?: RecurrencePattern | null;
+  interval?: number;
+  days_of_week?: number[] | null;
+  end_type?: EndType;
+  end_count?: number | null;
+  end_date?: string | null;
+  is_active?: boolean;
+  extra_config?: Record<string, unknown> | null;
+}
+
+// ── Service ────────────────────────────────────────────────────────────────
+
+class RecurringTaskService {
+  private static instance: RecurringTaskService;
+
+  static getInstance(): RecurringTaskService {
+    if (!RecurringTaskService.instance) {
+      RecurringTaskService.instance = new RecurringTaskService();
+    }
+    return RecurringTaskService.instance;
+  }
+
+  async listRecurringTasks(options?: { activeOnly?: boolean }): Promise<RecurringTask[]> {
+    const params = options?.activeOnly ? '?active_only=true' : '';
+    const response = await axiosInstance.get<RecurringTask[]>(`/tasks/recurring/${params}`);
+    return response.data;
+  }
+
+  async getRecurringTask(id: number): Promise<RecurringTask> {
+    const response = await axiosInstance.get<RecurringTask>(`/tasks/recurring/${id}`);
+    return response.data;
+  }
+
+  async createRecurringTask(payload: CreateRecurringTaskPayload): Promise<RecurringTask> {
+    if (!payload.interval_minutes && !payload.recurrence_pattern) {
+      throw new Error('At least one of interval_minutes or recurrence_pattern is required');
+    }
+    if (payload.recurrence_pattern === 'weekly' && (!payload.days_of_week || payload.days_of_week.length === 0)) {
+      throw new Error('days_of_week is required when recurrence_pattern is "weekly"');
     }
 
-    const response = await axios.post<CreateRecurringTaskResponse>(
-      "/recurring-tasks/",
-      {
-        ...taskData,
-        recurrence,
-      }
-    );
+    // If interval_minutes is set it takes precedence — omit recurrence_pattern from body
+    const body: Record<string, unknown> = { ...payload };
+    if (payload.interval_minutes) {
+      delete body.recurrence_pattern;
+    }
 
-    console.log(
-      "✅ Recurring task created:",
-      response.data.template_id,
-      "-",
-      response.data.pattern
-    );
-    return {
-      success: true,
-      data: response.data,
-    };
-  } catch (error: any) {
-    console.error("❌ Error creating recurring task:", error.message);
-    return {
-      success: false,
-      message:
-        error.response?.data?.detail || "Error creating recurring task",
-      error,
-    };
+    const response = await axiosInstance.post<RecurringTask>('/tasks/recurring/', body);
+    return response.data;
+  }
+
+  async updateRecurringTask(id: number, payload: UpdateRecurringTaskPayload): Promise<RecurringTask> {
+    const response = await axiosInstance.patch<RecurringTask>(`/tasks/recurring/${id}`, payload);
+    return response.data;
+  }
+
+  async deleteRecurringTask(id: number): Promise<void> {
+    await axiosInstance.delete(`/tasks/recurring/${id}`);
+  }
+
+  async completeRecurringTask(id: number): Promise<RecurringTask> {
+    const response = await axiosInstance.post<RecurringTask>(`/tasks/recurring/${id}/complete`, {});
+    return response.data;
   }
 }
 
-/**
- * Gets all recurring task templates for the authenticated user
- * @param activeOnly - If true, returns only active templates (default: true)
- * @returns List of templates
- */
-export async function getRecurringTemplates(
-  activeOnly: boolean = true
-): Promise<ApiResponse<GetTemplatesResponse>> {
-  try {
-    const authStatus = await checkAndRefreshAuth();
-    if (!authStatus.isAuthenticated) {
-      console.log(
-        "[RECURRING_TASK_SERVICE] getRecurringTemplates: user not authenticated"
-      );
-      return {
-        success: false,
-        message: "Authentication token invalid",
-      };
-    }
-
-    const response = await axios.get<GetTemplatesResponse>(
-      "/recurring-tasks/",
-      {
-        params: { active_only: activeOnly },
-      }
-    );
-
-    console.log(
-      "✅ Retrieved",
-      response.data.total_templates,
-      "recurring templates"
-    );
-    return {
-      success: true,
-      data: response.data,
-    };
-  } catch (error: any) {
-    console.error("❌ Error fetching recurring templates:", error.message);
-    return {
-      success: false,
-      message:
-        error.response?.data?.detail || "Error fetching recurring templates",
-      error,
-    };
-  }
-}
-
-/**
- * Gets detailed information about a specific recurring task template
- * @param templateId - ID of the template
- * @returns Template details
- */
-export async function getTemplateDetails(
-  templateId: number
-): Promise<ApiResponse<RecurringTemplate>> {
-  try {
-    const authStatus = await checkAndRefreshAuth();
-    if (!authStatus.isAuthenticated) {
-      console.log(
-        "[RECURRING_TASK_SERVICE] getTemplateDetails: user not authenticated"
-      );
-      return {
-        success: false,
-        message: "Authentication token invalid",
-      };
-    }
-
-    const response = await axios.get<RecurringTemplate>(
-      `/recurring-tasks/${templateId}`
-    );
-
-    console.log("✅ Retrieved template details:", templateId);
-    return {
-      success: true,
-      data: response.data,
-    };
-  } catch (error: any) {
-    console.error("❌ Error fetching template details:", error.message);
-    return {
-      success: false,
-      message:
-        error.response?.data?.detail || "Error fetching template details",
-      error,
-    };
-  }
-}
-
-/**
- * Gets all task instances generated from a specific template
- * @param templateId - ID of the template
- * @param includeCompleted - If true, includes completed instances (default: false)
- * @returns List of task instances
- */
-export async function getTemplateInstances(
-  templateId: number,
-  includeCompleted: boolean = false
-): Promise<ApiResponse<GetInstancesResponse>> {
-  try {
-    const authStatus = await checkAndRefreshAuth();
-    if (!authStatus.isAuthenticated) {
-      console.log(
-        "[RECURRING_TASK_SERVICE] getTemplateInstances: user not authenticated"
-      );
-      return {
-        success: false,
-        message: "Authentication token invalid",
-      };
-    }
-
-    const response = await axios.get<GetInstancesResponse>(
-      `/recurring-tasks/${templateId}/instances`,
-      {
-        params: { include_completed: includeCompleted },
-      }
-    );
-
-    console.log(
-      "✅ Retrieved",
-      response.data.total_instances,
-      "instances for template",
-      templateId
-    );
-    return {
-      success: true,
-      data: response.data,
-    };
-  } catch (error: any) {
-    console.error("❌ Error fetching template instances:", error.message);
-    return {
-      success: false,
-      message:
-        error.response?.data?.detail || "Error fetching template instances",
-      error,
-    };
-  }
-}
-
-/**
- * Updates a recurring task template
- * Note: This only affects future instances, not already generated ones
- * @param templateId - ID of the template to update
- * @param updates - Partial recurrence configuration updates
- * @returns Updated template confirmation
- */
-export async function updateTemplate(
-  templateId: number,
-  updates: Partial<RecurrenceConfig>
-): Promise<ApiResponse<any>> {
-  try {
-    const authStatus = await checkAndRefreshAuth();
-    if (!authStatus.isAuthenticated) {
-      console.log(
-        "[RECURRING_TASK_SERVICE] updateTemplate: user not authenticated"
-      );
-      return {
-        success: false,
-        message: "Authentication token invalid",
-      };
-    }
-
-    const response = await axios.put(`/recurring-tasks/${templateId}`, updates);
-
-    console.log("✅ Template updated:", templateId);
-    return {
-      success: true,
-      data: response.data,
-    };
-  } catch (error: any) {
-    console.error("❌ Error updating template:", error.message);
-    return {
-      success: false,
-      message: error.response?.data?.detail || "Error updating template",
-      error,
-    };
-  }
-}
-
-/**
- * Deactivates a template, preventing it from generating new instances
- * Existing instances are NOT deleted
- * @param templateId - ID of the template to deactivate
- * @returns Deactivation confirmation
- */
-export async function deactivateTemplate(
-  templateId: number
-): Promise<ApiResponse<any>> {
-  try {
-    const authStatus = await checkAndRefreshAuth();
-    if (!authStatus.isAuthenticated) {
-      console.log(
-        "[RECURRING_TASK_SERVICE] deactivateTemplate: user not authenticated"
-      );
-      return {
-        success: false,
-        message: "Authentication token invalid",
-      };
-    }
-
-    const response = await axios.post(
-      `/recurring-tasks/${templateId}/deactivate`
-    );
-
-    console.log("✅ Template deactivated:", templateId);
-    return {
-      success: true,
-      data: response.data,
-    };
-  } catch (error: any) {
-    console.error("❌ Error deactivating template:", error.message);
-    return {
-      success: false,
-      message: error.response?.data?.detail || "Error deactivating template",
-      error,
-    };
-  }
-}
-
-/**
- * Permanently deletes a template and ALL its associated instances (CASCADE delete)
- * WARNING: This action is irreversible
- * @param templateId - ID of the template to delete
- * @returns Deletion confirmation
- */
-export async function deleteTemplate(
-  templateId: number
-): Promise<ApiResponse<void>> {
-  try {
-    const authStatus = await checkAndRefreshAuth();
-    if (!authStatus.isAuthenticated) {
-      console.log(
-        "[RECURRING_TASK_SERVICE] deleteTemplate: user not authenticated"
-      );
-      return {
-        success: false,
-        message: "Authentication token invalid",
-      };
-    }
-
-    await axios.delete(`/recurring-tasks/${templateId}`);
-
-    console.log("✅ Template deleted:", templateId);
-    return {
-      success: true,
-    };
-  } catch (error: any) {
-    console.error("❌ Error deleting template:", error.message);
-    return {
-      success: false,
-      message: error.response?.data?.detail || "Error deleting template",
-      error,
-    };
-  }
-}
+export const recurringTaskService = RecurringTaskService.getInstance();
+export default RecurringTaskService;

@@ -40,6 +40,7 @@ export type RootStackParamList = {
   NotificationSettings: undefined;
   MemorySettings: undefined;
   AISettings: undefined;
+  RecurringTasks: undefined;
   Statistics: undefined;
   Updates: undefined;
   NotFound: undefined;
