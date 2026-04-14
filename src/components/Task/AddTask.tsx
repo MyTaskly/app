@@ -410,7 +410,7 @@ const AddTask: React.FC<AddTaskProps> = ({
             {/* Scadenza semplice: date/time picker */}
             {deadlineType === 'simple' && (
               <View style={styles.deadlineContent}>
-                <View style={styles.dateTimeContainer}>
+                <View style={[styles.dateTimeContainer, { marginBottom: 0 }]}>
                   <TouchableOpacity
                     style={[styles.datePickerButton, styles.dateButton]}
                     onPress={showDatepicker}
@@ -451,7 +451,7 @@ const AddTask: React.FC<AddTaskProps> = ({
 
                 {selectedDateTime && (
                   <TouchableOpacity
-                    style={styles.clearDateButton}
+                    style={[styles.clearDateButton, { marginTop: 8, marginBottom: 0 }]}
                     onPress={() => {
                       setSelectedDateTime(null);
                       setDueDate("");
@@ -879,7 +879,12 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   deadlineContent: {
-    marginBottom: 8,
+    marginBottom: 16,
+    padding: 16,
+    backgroundColor: "#f8f8f8",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#e1e5e9",
   },
   recurringConfigContainer: {
     marginBottom: 16,

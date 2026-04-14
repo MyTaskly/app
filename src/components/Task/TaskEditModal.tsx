@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Modal, TextInput, ScrollView, Alert, Switch } from "react-native";
+import { View, Text, TouchableOpacity, Modal, TextInput, ScrollView, Alert, StyleSheet } from "react-native";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { styles } from "./TaskStyles";
@@ -14,21 +14,6 @@ const DURATION_PRESETS = [
   { label: "2 ore", value: 120 },
   { label: "4 ore", value: 240 },
 ];
-
-const recurrenceToggleRow = {
-  flexDirection: "row" as const,
-  alignItems: "center" as const,
-  justifyContent: "space-between" as const,
-  marginTop: 16,
-  marginBottom: 8,
-  paddingVertical: 10,
-  paddingHorizontal: 4,
-  borderTopWidth: 1,
-  borderTopColor: "#f0f0f0",
-};
-const recurrenceToggleLabelRow = { flexDirection: "row" as const, alignItems: "center" as const };
-const recurrenceToggleLabel = { fontSize: 15, fontWeight: "500" as const, color: "#000000", fontFamily: "System" };
-const recurrenceConfigWrapper = { marginTop: 4, paddingTop: 8, borderTopWidth: 1, borderTopColor: "#f0f0f0" };
 
 // Componente per il modal di modifica
 const TaskEditModal = ({ 
@@ -52,7 +37,8 @@ const TaskEditModal = ({
   const [pickerMode, setPickerMode] = useState('date');
   const [dateType, setDateType] = useState('end'); // 'start' o 'end'
   const [customDuration, setCustomDuration] = useState<string>("");
-  const [isRecurring, setIsRecurring] = useState(false);
+  const [deadlineType, setDeadlineType] = useState<'none' | 'simple' | 'recurring'>('none');
+  const isRecurring = deadlineType === 'recurring';
   const [recurrenceConfig, setRecurrenceConfig] = useState<RecurrenceConfigType>({
     pattern: 'daily',
     interval: 1,
@@ -73,9 +59,8 @@ const TaskEditModal = ({
       });
       setCustomDuration(task.duration_minutes ? String(task.duration_minutes) : "");
 
-      const taskIsRecurring = !!(task.is_recurring);
-      setIsRecurring(taskIsRecurring);
-      if (taskIsRecurring) {
+      if (task.is_recurring) {
+        setDeadlineType('recurring');
         setRecurrenceConfig({
           pattern: (task.recurrence_pattern as any) || 'daily',
           interval: task.recurrence_interval || 1,
@@ -85,7 +70,11 @@ const TaskEditModal = ({
           end_date: task.recurrence_end_date,
           end_count: task.recurrence_end_count,
         });
+      } else if (task.end_time) {
+        setDeadlineType('simple');
+        setRecurrenceConfig({ pattern: 'daily', interval: 1, end_type: 'never' });
       } else {
+        setDeadlineType('none');
         setRecurrenceConfig({ pattern: 'daily', interval: 1, end_type: 'never' });
       }
     }
@@ -139,6 +128,7 @@ const TaskEditModal = ({
 
     if (isRecurring) {
       taskData.is_recurring = true;
+      taskData.end_time = null;
       taskData.recurrence_pattern = recurrenceConfig.pattern;
       taskData.recurrence_interval = recurrenceConfig.interval;
       taskData.recurrence_days_of_week = recurrenceConfig.days_of_week;
@@ -196,44 +186,102 @@ const TaskEditModal = ({
               textAlignVertical="top"
             />
             
-            <Text style={styles.inputLabel}>Data di inizio</Text>
-            <DatePickerButton 
-              value={editedTask.start_time}
-              onPress={() => openDatePicker('start')}
-              placeholder="Seleziona data di inizio"
-            />
-            
-            <Text style={styles.inputLabel}>Data e ora di scadenza (opzionale)</Text>
-            <View style={styles.dateTimeContainer}>
-              <View style={styles.dateButton}>
-                <DatePickerButton 
-                  value={editedTask.end_time}
-                  onPress={() => openDatePicker('end')}
-                  placeholder="Nessuna scadenza"
-                />
-              </View>
-              
-              <View style={styles.timeButton}>
-                <TimePickerButton 
-                  value={editedTask.end_time}
-                  onPress={() => editedTask.end_time ? openTimePicker('end') : null}
-                  placeholder="Seleziona ora"
-                />
-              </View>
-            </View>
-            
-            {editedTask.end_time && (
+            {/* Segmented control: Scadenza semplice / Ripetitività */}
+            <Text style={styles.inputLabel}>Scadenza</Text>
+            <View style={editStyles.deadlineTypeContainer}>
               <TouchableOpacity
-                style={styles.clearDateButton}
-                onPress={() => setEditedTask({...editedTask, end_time: null})}
+                style={[
+                  editStyles.deadlineTypeButton,
+                  editStyles.deadlineTypeButtonLeft,
+                  deadlineType === 'simple' && editStyles.deadlineTypeButtonActive,
+                ]}
+                onPress={() => {
+                  setDeadlineType(deadlineType === 'simple' ? 'none' : 'simple');
+                  if (deadlineType === 'simple') {
+                    setEditedTask({...editedTask, end_time: null});
+                  }
+                }}
               >
-                <Text style={styles.clearDateText}>Rimuovi scadenza</Text>
+                <Ionicons
+                  name="calendar-outline"
+                  size={16}
+                  color={deadlineType === 'simple' ? "#ffffff" : "#666666"}
+                />
+                <Text style={[
+                  editStyles.deadlineTypeText,
+                  deadlineType === 'simple' && editStyles.deadlineTypeTextActive,
+                ]}>
+                  Scadenza semplice
+                </Text>
               </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  editStyles.deadlineTypeButton,
+                  editStyles.deadlineTypeButtonRight,
+                  deadlineType === 'recurring' && editStyles.deadlineTypeButtonActive,
+                ]}
+                onPress={() => {
+                  setDeadlineType(deadlineType === 'recurring' ? 'none' : 'recurring');
+                  if (deadlineType === 'recurring') {
+                    setEditedTask({...editedTask, end_time: null});
+                  }
+                }}
+              >
+                <Ionicons
+                  name="repeat"
+                  size={16}
+                  color={deadlineType === 'recurring' ? "#ffffff" : "#666666"}
+                />
+                <Text style={[
+                  editStyles.deadlineTypeText,
+                  deadlineType === 'recurring' && editStyles.deadlineTypeTextActive,
+                ]}>
+                  Ripetitività
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Scadenza semplice */}
+            {deadlineType === 'simple' && (
+              <View style={editStyles.deadlineContent}>
+                <View style={[styles.dateTimeContainer, { marginBottom: 0 }]}>
+                  <View style={styles.dateButton}>
+                    <DatePickerButton
+                      value={editedTask.end_time}
+                      onPress={() => openDatePicker('end')}
+                      placeholder="Seleziona data"
+                    />
+                  </View>
+                  <View style={styles.timeButton}>
+                    <TimePickerButton
+                      value={editedTask.end_time}
+                      onPress={() => editedTask.end_time ? openTimePicker('end') : null}
+                      placeholder="Ora"
+                    />
+                  </View>
+                </View>
+                {editedTask.end_time && (
+                  <TouchableOpacity
+                    style={[styles.clearDateButton, { marginTop: 8, marginBottom: 0 }]}
+                    onPress={() => setEditedTask({...editedTask, end_time: null})}
+                  >
+                    <Text style={styles.clearDateText}>Rimuovi scadenza</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             )}
-            
+
+            {/* Ripetitività */}
+            {deadlineType === 'recurring' && (
+              <View style={editStyles.deadlineContent}>
+                <RecurrenceConfig value={recurrenceConfig} onChange={setRecurrenceConfig} />
+              </View>
+            )}
+
             {showDatePicker && (
               <DateTimePicker
-                value={dateType === 'end' 
+                value={dateType === 'end'
                   ? (editedTask.end_time ? new Date(editedTask.end_time) : new Date())
                   : (editedTask.start_time ? new Date(editedTask.start_time) : new Date())}
                 mode="date"
@@ -241,10 +289,10 @@ const TaskEditModal = ({
                 onChange={handleDateChange}
               />
             )}
-            
+
             {showTimePicker && (
               <DateTimePicker
-                value={dateType === 'end' 
+                value={dateType === 'end'
                   ? (editedTask.end_time ? new Date(editedTask.end_time) : new Date())
                   : (editedTask.start_time ? new Date(editedTask.start_time) : new Date())}
                 mode="time"
@@ -253,17 +301,17 @@ const TaskEditModal = ({
                 is24Hour={true}
               />
             )}
-            
-            <Text style={styles.inputLabel}>Priorità</Text>
-            <PrioritySelector 
-              value={editedTask.priority} 
-              onChange={(priority) => setEditedTask({...editedTask, priority})} 
+
+            <Text style={[styles.inputLabel, { marginTop: 20 }]}>Priorità</Text>
+            <PrioritySelector
+              value={editedTask.priority}
+              onChange={(priority) => setEditedTask({...editedTask, priority})}
             />
 
             <Text style={styles.inputLabel}>Stato</Text>
-            <StatusSelector 
-              value={editedTask.status} 
-              onChange={(status) => setEditedTask({...editedTask, status})} 
+            <StatusSelector
+              value={editedTask.status}
+              onChange={(status) => setEditedTask({...editedTask, status})}
             />
 
             <Text style={styles.inputLabel}>Durata stimata (opzionale)</Text>
@@ -325,25 +373,6 @@ const TaskEditModal = ({
                 </TouchableOpacity>
               )}
             </View>
-
-            {/* Ricorrenza */}
-            <View style={recurrenceToggleRow}>
-              <View style={recurrenceToggleLabelRow}>
-                <Ionicons name="repeat" size={18} color="#007AFF" style={{ marginRight: 6 }} />
-                <Text style={recurrenceToggleLabel}>Task ricorrente</Text>
-              </View>
-              <Switch
-                value={isRecurring}
-                onValueChange={setIsRecurring}
-                trackColor={{ false: "#e0e0e0", true: "#007AFF" }}
-                thumbColor="#ffffff"
-              />
-            </View>
-            {isRecurring && (
-              <View style={recurrenceConfigWrapper}>
-                <RecurrenceConfig value={recurrenceConfig} onChange={setRecurrenceConfig} />
-              </View>
-            )}
           </ScrollView>
           
           <View style={styles.editModalFooter}>
@@ -359,5 +388,55 @@ const TaskEditModal = ({
     </Modal>
   );
 };
+
+const editStyles = StyleSheet.create({
+  deadlineTypeContainer: {
+    flexDirection: "row",
+    marginBottom: 16,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: "#e1e5e9",
+    overflow: "hidden",
+  },
+  deadlineTypeButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    backgroundColor: "#ffffff",
+  },
+  deadlineTypeButtonLeft: {
+    borderRightWidth: 0.75,
+    borderRightColor: "#e1e5e9",
+  },
+  deadlineTypeButtonRight: {
+    borderLeftWidth: 0.75,
+    borderLeftColor: "#e1e5e9",
+  },
+  deadlineTypeButtonActive: {
+    backgroundColor: "#000000",
+  },
+  deadlineTypeText: {
+    fontSize: 14,
+    fontWeight: "400" as const,
+    color: "#666666",
+    fontFamily: "System",
+  },
+  deadlineTypeTextActive: {
+    color: "#ffffff",
+    fontWeight: "500" as const,
+  },
+  deadlineContent: {
+    marginBottom: 16,
+    padding: 16,
+    backgroundColor: "#f8f8f8",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#e1e5e9",
+  },
+});
 
 export default TaskEditModal;
