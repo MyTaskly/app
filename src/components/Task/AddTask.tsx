@@ -8,16 +8,10 @@ import {
   Modal,
   Alert,
   ScrollView,
-  Switch,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Ionicons } from "@expo/vector-icons";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
 import { addTaskToList } from "../TaskList/types";
 import { getCategories } from "../../services/taskService";
 import dayjs from "dayjs";
@@ -58,7 +52,6 @@ const AddTask: React.FC<AddTaskProps> = ({
     categoryName || ""
   );
   const [categoryError, setCategoryError] = useState<string>("");
-  const animationValue = useSharedValue(0);
   const [priority, setPriority] = useState<number>(1);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -70,8 +63,9 @@ const AddTask: React.FC<AddTaskProps> = ({
   const [isPickerVisible, setPickerVisible] = useState(false);
   const [pickerMode, setPickerMode] = useState<"date" | "time">("date");
 
-  // Recurring task state
-  const [isRecurring, setIsRecurring] = useState(false);
+  // Tipo di scadenza: 'simple' = scadenza semplice, 'recurring' = ripetitività, 'none' = nessuna
+  const [deadlineType, setDeadlineType] = useState<'none' | 'simple' | 'recurring'>('none');
+  const isRecurring = deadlineType === 'recurring';
   const [recurrenceConfig, setRecurrenceConfig] = useState<RecurrenceConfigType>({
     pattern: "daily",
     interval: 1,
@@ -90,19 +84,12 @@ const AddTask: React.FC<AddTaskProps> = ({
     { label: "4 ore", value: 240 },
   ];
 
-  // Gestisce l'animazione all'apertura del modale
+  // Se initialDate è fornito, imposta la data iniziale all'apertura
   useEffect(() => {
-    if (visible) {
-      animationValue.value = withSpring(1, { damping: 12 });
-
-      // Se initialDate è fornito, imposta la data iniziale
-      if (initialDate) {
-        initializeWithDate(initialDate);
-      }
-    } else {
-      animationValue.value = withSpring(0, { damping: 12 });
+    if (visible && initialDate) {
+      initializeWithDate(initialDate);
     }
-  }, [visible, initialDate, animationValue]);
+  }, [visible, initialDate]);
 
   // Carica le categorie se necessario
   useEffect(() => {
@@ -128,13 +115,12 @@ const AddTask: React.FC<AddTaskProps> = ({
     setSelectedDateTime(initialDateTime);
     setDueDate(initialDateTime.toISOString());
     setDate(initialDateTime);
+    setDeadlineType('simple');
   };
 
   const handleCancel = () => {
-    // Prima animiamo la chiusura, poi chiamiamo onClose
-    animationValue.value = withSpring(0, { damping: 12 });
-    setTimeout(() => onClose(), 300);
     resetForm();
+    onClose();
   };
 
   const resetForm = () => {
@@ -147,7 +133,7 @@ const AddTask: React.FC<AddTaskProps> = ({
     setDateError("");
     setLocalCategory(categoryName || "");
     setCategoryError("");
-    setIsRecurring(false);
+    setDeadlineType('none');
     setRecurrenceConfig({
       pattern: "daily",
       interval: 1,
@@ -292,15 +278,11 @@ const AddTask: React.FC<AddTaskProps> = ({
     setPickerVisible(true);
   };
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: animationValue.value }],
-    opacity: animationValue.value,
-  }));
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal visible={visible} transparent animationType="slide">
       <View style={styles.modalOverlay}>
-        <Animated.View style={[styles.formContainer, animatedStyle]}>
+        <View style={styles.formContainer}>
           <View style={styles.formHeader}>
             <Text style={styles.formTitle}>Aggiungi Task</Text>
             <TouchableOpacity onPress={handleCancel}>
@@ -341,6 +323,7 @@ const AddTask: React.FC<AddTaskProps> = ({
                 ) : null}
               </>
             )}
+
             <Text style={styles.inputLabel}>Titolo *</Text>
             <TextInput
               style={[styles.input, titleError ? styles.inputError : null]}
@@ -366,66 +349,136 @@ const AddTask: React.FC<AddTaskProps> = ({
               onChangeText={setDescription}
             />
 
-            <Text style={styles.inputLabel}>
-              Data e ora di scadenza (opzionale)
-            </Text>
-            <View style={styles.dateTimeContainer}>
+            {/* Segmented control: Scadenza semplice / Ripetitività */}
+            <Text style={styles.inputLabel}>Scadenza</Text>
+            <View style={styles.deadlineTypeContainer}>
               <TouchableOpacity
-                style={[styles.datePickerButton, styles.dateButton]}
-                onPress={showDatepicker}
+                style={[
+                  styles.deadlineTypeButton,
+                  styles.deadlineTypeButtonLeft,
+                  deadlineType === 'simple' && styles.deadlineTypeButtonActive,
+                ]}
+                onPress={() => {
+                  setDeadlineType(deadlineType === 'simple' ? 'none' : 'simple');
+                  if (deadlineType === 'simple') {
+                    setSelectedDateTime(null);
+                    setDueDate("");
+                  }
+                }}
               >
-                <Text style={styles.datePickerText}>
-                  {selectedDateTime
-                    ? selectedDateTime.toLocaleDateString("it-IT")
-                    : "Nessuna scadenza"}
+                <Ionicons
+                  name="calendar-outline"
+                  size={16}
+                  color={deadlineType === 'simple' ? "#ffffff" : "#666666"}
+                />
+                <Text style={[
+                  styles.deadlineTypeText,
+                  deadlineType === 'simple' && styles.deadlineTypeTextActive,
+                ]}>
+                  Scadenza semplice
                 </Text>
-                <Ionicons name="calendar-outline" size={20} color="#666" />
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.datePickerButton, styles.timeButton]}
-                onPress={showTimepicker}
-                disabled={!selectedDateTime}
+                style={[
+                  styles.deadlineTypeButton,
+                  styles.deadlineTypeButtonRight,
+                  deadlineType === 'recurring' && styles.deadlineTypeButtonActive,
+                ]}
+                onPress={() => {
+                  setDeadlineType(deadlineType === 'recurring' ? 'none' : 'recurring');
+                  if (deadlineType === 'recurring') {
+                    setSelectedDateTime(null);
+                    setDueDate("");
+                  }
+                }}
               >
-                <Text
-                  style={[
-                    styles.datePickerText,
-                    !selectedDateTime && styles.disabledText,
-                  ]}
-                >
-                  {selectedDateTime
-                    ? selectedDateTime.toLocaleTimeString("it-IT", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
-                    : "Seleziona ora"}
-                </Text>
                 <Ionicons
-                  name="time-outline"
-                  size={20}
-                  color={selectedDateTime ? "#666" : "#ccc"}
+                  name="repeat"
+                  size={16}
+                  color={deadlineType === 'recurring' ? "#ffffff" : "#666666"}
                 />
+                <Text style={[
+                  styles.deadlineTypeText,
+                  deadlineType === 'recurring' && styles.deadlineTypeTextActive,
+                ]}>
+                  Ripetitività
+                </Text>
               </TouchableOpacity>
             </View>
 
-            {selectedDateTime && (
-              <TouchableOpacity
-                style={styles.clearDateButton}
-                onPress={() => {
-                  setSelectedDateTime(null);
-                  setDueDate("");
-                  setDateError("");
-                }}
-              >
-                <Text style={styles.clearDateText}>Rimuovi scadenza</Text>
-              </TouchableOpacity>
+            {/* Scadenza semplice: date/time picker */}
+            {deadlineType === 'simple' && (
+              <View style={styles.deadlineContent}>
+                <View style={styles.dateTimeContainer}>
+                  <TouchableOpacity
+                    style={[styles.datePickerButton, styles.dateButton]}
+                    onPress={showDatepicker}
+                  >
+                    <Text style={styles.datePickerText}>
+                      {selectedDateTime
+                        ? selectedDateTime.toLocaleDateString("it-IT")
+                        : "Seleziona data"}
+                    </Text>
+                    <Ionicons name="calendar-outline" size={20} color="#666" />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.datePickerButton, styles.timeButton]}
+                    onPress={showTimepicker}
+                    disabled={!selectedDateTime}
+                  >
+                    <Text
+                      style={[
+                        styles.datePickerText,
+                        !selectedDateTime && styles.disabledText,
+                      ]}
+                    >
+                      {selectedDateTime
+                        ? selectedDateTime.toLocaleTimeString("it-IT", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "Ora"}
+                    </Text>
+                    <Ionicons
+                      name="time-outline"
+                      size={20}
+                      color={selectedDateTime ? "#666" : "#ccc"}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                {selectedDateTime && (
+                  <TouchableOpacity
+                    style={styles.clearDateButton}
+                    onPress={() => {
+                      setSelectedDateTime(null);
+                      setDueDate("");
+                      setDateError("");
+                    }}
+                  >
+                    <Text style={styles.clearDateText}>Rimuovi scadenza</Text>
+                  </TouchableOpacity>
+                )}
+
+                {dateError ? (
+                  <Text style={styles.errorText}>{dateError}</Text>
+                ) : null}
+              </View>
             )}
 
-            {dateError ? (
-              <Text style={styles.errorText}>{dateError}</Text>
-            ) : null}
+            {/* Ripetitività: RecurrenceConfig */}
+            {deadlineType === 'recurring' && (
+              <View style={styles.recurringConfigContainer}>
+                <RecurrenceConfig
+                  value={recurrenceConfig}
+                  onChange={setRecurrenceConfig}
+                />
+              </View>
+            )}
 
-            <Text style={styles.inputLabel}>Priorità</Text>
+            <Text style={[styles.inputLabel, { marginTop: 20 }]}>Priorità</Text>
             <View style={styles.priorityContainer}>
               <TouchableOpacity
                 style={[
@@ -540,28 +593,6 @@ const AddTask: React.FC<AddTaskProps> = ({
                 </TouchableOpacity>
               )}
             </View>
-
-            {/* Recurring Task Toggle */}
-            <View style={styles.recurringToggleContainer}>
-              <Text style={styles.inputLabel}>{t('recurring.toggle')}</Text>
-              <Switch
-                value={isRecurring}
-                onValueChange={setIsRecurring}
-                trackColor={{ false: "#e1e5e9", true: "#000000" }}
-                thumbColor={isRecurring ? "#ffffff" : "#f4f3f4"}
-                ios_backgroundColor="#e1e5e9"
-              />
-            </View>
-
-            {/* Recurring Configuration */}
-            {isRecurring && (
-              <View style={styles.recurringConfigContainer}>
-                <RecurrenceConfig
-                  value={recurrenceConfig}
-                  onChange={setRecurrenceConfig}
-                />
-              </View>
-            )}
           </ScrollView>
 
           <View style={styles.formFooter}>
@@ -581,7 +612,7 @@ const AddTask: React.FC<AddTaskProps> = ({
             onCancel={hidePicker}
             is24Hour={true}
           />
-        </Animated.View>
+        </View>
       </View>
     </Modal>
   );
@@ -589,29 +620,25 @@ const AddTask: React.FC<AddTaskProps> = ({
 
 const styles = StyleSheet.create({
   modalOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "flex-end",
   },
   formContainer: {
-    width: "90%",
-    maxHeight: "80%",
+    width: "100%",
+    height: "92%",
     backgroundColor: "#ffffff",
-    borderRadius: 24,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: -4,
     },
     shadowOpacity: 0.08,
     shadowRadius: 12,
-    elevation: 3,
+    elevation: 8,
   },
   formHeader: {
     flexDirection: "row",
@@ -812,15 +839,49 @@ const styles = StyleSheet.create({
     fontFamily: "System",
     textDecorationLine: "underline",
   },
-  recurringToggleContainer: {
+  deadlineTypeContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     marginBottom: 16,
-    paddingVertical: 8,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: "#e1e5e9",
+    overflow: "hidden",
+  },
+  deadlineTypeButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    backgroundColor: "#ffffff",
+  },
+  deadlineTypeButtonLeft: {
+    borderRightWidth: 0.75,
+    borderRightColor: "#e1e5e9",
+  },
+  deadlineTypeButtonRight: {
+    borderLeftWidth: 0.75,
+    borderLeftColor: "#e1e5e9",
+  },
+  deadlineTypeButtonActive: {
+    backgroundColor: "#000000",
+  },
+  deadlineTypeText: {
+    fontSize: 14,
+    fontWeight: "400",
+    color: "#666666",
+    fontFamily: "System",
+  },
+  deadlineTypeTextActive: {
+    color: "#ffffff",
+    fontWeight: "500",
+  },
+  deadlineContent: {
+    marginBottom: 8,
   },
   recurringConfigContainer: {
-    marginTop: 8,
     marginBottom: 16,
     padding: 16,
     backgroundColor: "#f8f8f8",
