@@ -25,11 +25,15 @@ export interface CalendarEventsResponse {
 }
 
 export interface SyncResponse {
-  message: string;
-  created_count?: number;
-  updated_count?: number;
+  message?: string;
+  // New /calendar/sync response shape (RRULE events imported as RecurringTask)
+  tasks_synced?: number;
+  recurring_tasks_synced?: number;
   skipped_count?: number;
+  deleted_count?: number;
   errors?: any[];
+  // Legacy field — kept for syncTasksToCalendar which uses a different endpoint
+  updated_count?: number;
 }
 
 export interface AuthorizeResponse {
@@ -129,7 +133,7 @@ class GoogleCalendarService {
   }
 
   /**
-   * Importa eventi da Google Calendar come task MyTaskly
+   * Importa eventi da Google Calendar come task MyTaskly (vecchio endpoint)
    */
   async syncCalendarToTasks(daysAhead: number = 30): Promise<{ success: boolean; data?: SyncResponse; error?: string }> {
     try {
@@ -137,6 +141,24 @@ class GoogleCalendarService {
       return { success: true, data: response.data };
     } catch (error: any) {
       console.error('❌ Errore nella sincronizzazione calendario → task:', error);
+      return {
+        success: false,
+        error: error.response?.data?.detail || error.message || 'Errore nella sincronizzazione'
+      };
+    }
+  }
+
+  /**
+   * Nuovo endpoint di sincronizzazione unificato.
+   * Gli eventi con RRULE vengono importati come RecurringTask.
+   * Response: { tasks_synced, recurring_tasks_synced, skipped_count, deleted_count, errors }
+   */
+  async syncCalendar(daysAhead: number = 30): Promise<{ success: boolean; data?: SyncResponse; error?: string }> {
+    try {
+      const response = await axiosInstance.post(`/calendar/sync?days_ahead=${daysAhead}`, {});
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      console.error('❌ Errore nella sincronizzazione calendario:', error);
       return {
         success: false,
         error: error.response?.data?.detail || error.message || 'Errore nella sincronizzazione'

@@ -156,7 +156,7 @@ export const useGoogleCalendar = (): UseGoogleCalendarReturn => {
       const ctt = result.results?.calendarToTasks;
       trackGoogleCalendarSynced(
         'full',
-        (ttc?.created_count ?? 0) + (ctt?.created_count ?? 0),
+        (ttc?.tasks_synced ?? 0) + (ctt?.tasks_synced ?? 0),
         (ttc?.updated_count ?? 0) + (ctt?.updated_count ?? 0)
       );
 
@@ -186,7 +186,7 @@ export const useGoogleCalendar = (): UseGoogleCalendarReturn => {
       // ── Analytics ──
       trackGoogleCalendarSynced(
         'tasks_to_calendar',
-        result.data?.created_count ?? 0,
+        result.data?.tasks_synced ?? 0,
         result.data?.updated_count ?? 0
       );
 
@@ -216,7 +216,7 @@ export const useGoogleCalendar = (): UseGoogleCalendarReturn => {
       // ── Analytics ──
       trackGoogleCalendarSynced(
         'calendar_to_tasks',
-        result.data?.created_count ?? 0,
+        result.data?.tasks_synced ?? 0,
         result.data?.updated_count ?? 0
       );
 
