@@ -47,6 +47,46 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onPress }) => {
     return datePrefix + timeRange;
   };
 
+  // Calcola la prossima data di scadenza stimata dal pattern di ricorrenza
+  const computeNextOccurrence = (): string | null => {
+    const pattern = task.recurrence_pattern;
+    if (!pattern) return null;
+
+    const interval = task.recurrence_interval || 1;
+    const now = dayjs();
+
+    if (pattern === 'daily') {
+      return now.add(interval, 'day').hour(9).minute(0).second(0).toISOString();
+    }
+
+    if (pattern === 'weekly') {
+      const days = task.recurrence_days_of_week;
+      if (days && days.length > 0) {
+        // Trova il prossimo giorno della settimana corrispondente (1=Lun, 7=Dom)
+        // dayjs: 0=Dom, 1=Lun, ..., 6=Sab → converti
+        const todayDow = now.day() === 0 ? 7 : now.day(); // 1-7 Mon-Sun
+        const sortedDays = [...days].sort((a, b) => a - b);
+        const nextDay = sortedDays.find(d => d > todayDow) ?? sortedDays[0];
+        const daysUntil = nextDay > todayDow
+          ? nextDay - todayDow
+          : 7 - todayDow + nextDay;
+        return now.add(daysUntil, 'day').hour(9).minute(0).second(0).toISOString();
+      }
+      return now.add(interval * 7, 'day').hour(9).minute(0).second(0).toISOString();
+    }
+
+    if (pattern === 'monthly') {
+      const dayOfMonth = task.recurrence_day_of_month || 1;
+      let next = now.date(dayOfMonth).hour(9).minute(0).second(0);
+      if (next.isBefore(now) || next.isSame(now, 'day')) {
+        next = next.add(interval, 'month');
+      }
+      return next.toISOString();
+    }
+
+    return null;
+  };
+
   // Format recurrence description for display
   const getRecurrenceDescription = (): string | null => {
     if (!task.is_recurring || !task.recurrence_pattern) return null;
@@ -175,9 +215,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onPress }) => {
         {(() => {
           const isRecurring = task.is_recurring || task.is_generated_instance;
           if (isRecurring) {
-            const dateString = task.next_occurrence || task.end_time;
+            const dateString = task.next_occurrence || task.end_time || computeNextOccurrence();
             const label = dateString
-              ? formatTaskTime(task.start_time, task.end_time, task.next_occurrence)
+              ? formatTaskTime(undefined, dateString, undefined)
               : 'Ricorrente';
             return (
               <View style={styles.dateRow}>
