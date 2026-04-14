@@ -262,7 +262,7 @@ export const styles = StyleSheet.create({
   },  priorityButtonActive: {
     borderWidth: 2,
     borderColor: '#000000',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#000000',
   },
   priorityButtonText: {
     fontWeight: '400',
@@ -272,7 +272,7 @@ export const styles = StyleSheet.create({
   },
   priorityButtonTextActive: {
     fontWeight: '500',
-    color: '#000000',
+    color: '#ffffff',
   },
   saveButton: {
     backgroundColor: '#000000',
@@ -355,7 +355,7 @@ export const styles = StyleSheet.create({
   dayButtonActive: {
     borderWidth: 2,
     borderColor: '#000000',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#000000',
   },
   dayButtonText: {
     fontSize: 13,
@@ -365,7 +365,7 @@ export const styles = StyleSheet.create({
   },
   dayButtonTextActive: {
     fontWeight: '500',
-    color: '#000000',
+    color: '#ffffff',
   },
   numberInputContainer: {
     flexDirection: 'row',
@@ -411,7 +411,7 @@ export const styles = StyleSheet.create({
   },
   durationChipActive: {
     borderColor: '#000000',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#000000',
     borderWidth: 2,
   },
   durationChipText: {
@@ -421,7 +421,7 @@ export const styles = StyleSheet.create({
     fontWeight: '400',
   },
   durationChipTextActive: {
-    color: '#000000',
+    color: '#ffffff',
     fontWeight: '500',
   },
   customDurationRow: {

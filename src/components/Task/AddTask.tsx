@@ -770,7 +770,7 @@ const styles = StyleSheet.create({
   priorityButtonActive: {
     borderWidth: 2,
     borderColor: "#000000",
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#000000",
   },
   priorityButtonText: {
     fontWeight: "400",
@@ -780,7 +780,7 @@ const styles = StyleSheet.create({
   },
   priorityButtonTextActive: {
     fontWeight: "500",
-    color: "#000000",
+    color: "#ffffff",
   },
   saveButton: {
     backgroundColor: "#000000",
@@ -901,7 +901,7 @@ const styles = StyleSheet.create({
   },
   durationChipActive: {
     borderColor: "#000000",
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#000000",
     borderWidth: 2,
   },
   durationChipText: {
@@ -911,7 +911,7 @@ const styles = StyleSheet.create({
     fontWeight: "400",
   },
   durationChipTextActive: {
-    color: "#000000",
+    color: "#ffffff",
     fontWeight: "500",
   },
   customDurationRow: {
