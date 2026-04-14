@@ -827,8 +827,7 @@ const styles = StyleSheet.create({
     color: "#ccc",
   },
   clearDateIconButton: {
-    justifyContent: "center",
-    alignItems: "center",
+    alignSelf: "center",
     paddingLeft: 8,
   },
   deadlineTypeContainer: {

@@ -245,7 +245,7 @@ const TaskEditModal = ({
             {/* Scadenza semplice */}
             {deadlineType === 'simple' && (
               <View style={editStyles.deadlineContent}>
-                <View style={[styles.dateTimeContainer, { marginBottom: 0, alignItems: "center" }]}>
+                <View style={[styles.dateTimeContainer, { marginBottom: 0 }]}>
                   <View style={styles.dateButton}>
                     <DatePickerButton
                       value={editedTask.end_time}
@@ -438,8 +438,7 @@ const editStyles = StyleSheet.create({
     borderColor: "#e1e5e9",
   },
   clearDateIconButton: {
-    justifyContent: "center" as const,
-    alignItems: "center" as const,
+    alignSelf: "center" as const,
     paddingLeft: 8,
   },
 });
