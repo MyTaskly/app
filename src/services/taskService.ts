@@ -5,6 +5,15 @@ import TaskCacheService from './TaskCacheService';
 import SyncManager from './SyncManager';
 import { emitTaskAdded, emitTaskUpdated, emitTaskDeleted, emitTasksSynced } from '../utils/eventEmitter';
 
+// MyTaskly API Changes — 2026-04-16
+// POST /categories
+export class CategoryLimitError extends Error {
+  constructor() {
+    super('Category limit reached for your current plan');
+    this.name = 'CategoryLimitError';
+  }
+}
+
 // Lazy initialization dei servizi per evitare problemi di caricamento
 let cacheService: TaskCacheService | null = null;
 let syncManager: SyncManager | null = null;
@@ -910,7 +919,10 @@ export async function addCategory(category: {
 
     console.log("Risposta dal server:", responseData);
     return responseData;
-  } catch (error) {
+  } catch (error: any) {
+    if (error.response?.status === 403) {
+      throw new CategoryLimitError();
+    }
     console.error("Errore in addCategory:", error);
     throw error;
   }

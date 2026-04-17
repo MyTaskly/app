@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styles } from './styles';
 
 export interface AddTaskButtonProps {
@@ -8,8 +9,9 @@ export interface AddTaskButtonProps {
 }
 
 export const AddTaskButton = ({ onPress }: AddTaskButtonProps) => {
+  const insets = useSafeAreaInsets();
   return (
-    <TouchableOpacity style={styles.addButton} onPress={onPress}>
+    <TouchableOpacity style={[styles.addButton, { bottom: 20 + insets.bottom }]} onPress={onPress}>
       <Ionicons name="add" size={28} color="#ffffff" />
     </TouchableOpacity>
   );

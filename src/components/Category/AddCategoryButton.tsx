@@ -15,7 +15,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
-import { addCategory } from "../../services/taskService";
+import { addCategory, CategoryLimitError } from "../../services/taskService";
 import { emitCategoryAdded } from "../../utils/eventEmitter";
 
 // Definiamo un'interfaccia chiara per i dati della categoria
@@ -106,6 +106,13 @@ const AddCategoryButton: React.FC<AddCategoryButtonProps> = ({
           onCategoryAdded(newCategory);
         }
       } catch (error) {
+        if (error instanceof CategoryLimitError) {
+          Alert.alert(
+            "Limite categorie raggiunto",
+            "Hai raggiunto il numero massimo di categorie per il tuo piano. Fai l'upgrade per aggiungerne altre."
+          );
+          return;
+        }
         console.error("Errore nel salvare la categoria sul server:", error);
         // In caso di errore del server, aggiungiamo comunque la categoria localmente
         console.log(

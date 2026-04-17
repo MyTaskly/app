@@ -68,7 +68,10 @@
       "Bash(gh pr:*)",
       "Bash(ls /home/gabry848/Documenti/MyTaskly/MyTaskly-app/src/components/*.tsx)",
       "Bash(python3:*)",
-      "Bash(but status:*)"
+      "Bash(but status:*)",
+      "mcp__claude_ai_Notion__notion-fetch",
+      "mcp__claude_ai_Notion__notion-search",
+      "mcp__claude_ai_Notion__notion-update-page"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

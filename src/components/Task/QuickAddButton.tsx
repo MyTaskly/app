@@ -1,12 +1,14 @@
 import React from "react";
 import { TouchableOpacity, StyleSheet, Animated } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export interface QuickAddButtonProps {
   onPress: () => void;
 }
 
 const QuickAddButton: React.FC<QuickAddButtonProps> = ({ onPress }) => {
+  const insets = useSafeAreaInsets();
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -32,6 +34,7 @@ const QuickAddButton: React.FC<QuickAddButtonProps> = ({ onPress }) => {
       style={[
         styles.container,
         {
+          bottom: 20 + insets.bottom,
           transform: [{ scale: scaleAnim }]
         }
       ]}
