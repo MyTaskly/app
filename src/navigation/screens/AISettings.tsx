@@ -50,34 +50,31 @@ export default function AISettings() {
     loadPlan();
   }, [loadPlan]);
 
+  // Se il piano è free e il modello era impostato su advanced, forza base
+  useEffect(() => {
+    if (!planData) return;
+    if (planData.effective_plan.toLowerCase() === 'free' && model === 'advanced') {
+      setModel('base');
+      AsyncStorage.setItem(AI_MODEL_KEY, 'base');
+      Alert.alert(
+        'Modello avanzato non disponibile',
+        'Il modello avanzato non è incluso nel piano Free. Hai impostato automaticamente il modello Base.',
+        [{ text: 'OK' }]
+      );
+    }
+  }, [planData]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleModelSelect = async (tier: ModelTier) => {
+    if (tier === 'advanced' && planData?.effective_plan.toLowerCase() === 'free') {
+      Alert.alert(
+        'Modello non disponibile',
+        'Il modello avanzato non è disponibile nel piano Free. Usa il modello Base oppure fai l\'upgrade.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
     setModel(tier);
     await AsyncStorage.setItem(AI_MODEL_KEY, tier);
-  };
-
-  const formatResetDate = (dateStr: string): string => {
-    try {
-      const date = new Date(dateStr + 'T00:00:00');
-      return date.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
-    } catch {
-      return dateStr;
-    }
-  };
-
-  const renderProgressBar = (used: number, limit: number) => {
-    const fraction = limit > 0 ? Math.min(used / limit, 1) : 0;
-    const isNearLimit = fraction >= 0.8;
-    return (
-      <View style={styles.progressBarTrack}>
-        <View
-          style={[
-            styles.progressBarFill,
-            { width: `${Math.round(fraction * 100)}%` as any },
-            isNearLimit && styles.progressBarWarning,
-          ]}
-        />
-      </View>
-    );
   };
 
   const renderPlanSection = () => {
@@ -98,45 +95,39 @@ export default function AISettings() {
       );
     }
 
-    const textUnlimited = isUnlimitedPlan(planData.text_messages_limit);
-    const voiceUnlimited = isUnlimitedPlan(planData.voice_requests_limit);
+    const textUnlimited = isUnlimitedPlan(planData.chat_text_daily_limit);
 
     return (
       <View style={styles.planCard}>
         <View style={styles.planBadgeRow}>
           <View style={styles.planBadge}>
-            <Text style={styles.planBadgeText}>{planData.plan}</Text>
+            <Text style={styles.planBadgeText}>{planData.effective_plan.toUpperCase()}</Text>
           </View>
-          <Text style={styles.resetDateText}>
-            {t('planUsage.resetsOn', { date: formatResetDate(planData.reset_date) })}
-          </Text>
         </View>
 
         <View style={styles.usageRow}>
           <View style={styles.usageLabelRow}>
-            <Text style={styles.usageLabel}>{t('planUsage.textMessages')}</Text>
+            <Text style={styles.usageLabel}>{t('planUsage.dailyMessages')}</Text>
             <Text style={styles.usageCount}>
               {textUnlimited
                 ? t('planUsage.unlimited')
-                : `${planData.text_messages_used} / ${planData.text_messages_limit}`}
+                : String(planData.chat_text_daily_limit)}
             </Text>
           </View>
-          {!textUnlimited && renderProgressBar(planData.text_messages_used, planData.text_messages_limit)}
         </View>
 
         <View style={styles.usageRow}>
           <View style={styles.usageLabelRow}>
             <Text style={styles.usageLabel}>{t('planUsage.voiceRequests')}</Text>
             <Text style={styles.usageCount}>
-              {voiceUnlimited
+              {planData.chat_voice_monthly_limit === null
                 ? t('planUsage.unlimited')
-                : `${planData.voice_requests_used} / ${planData.voice_requests_limit}`}
+                : String(planData.chat_voice_monthly_limit)}
             </Text>
           </View>
-          {!voiceUnlimited && renderProgressBar(planData.voice_requests_used, planData.voice_requests_limit)}
         </View>
 
-        {planData.plan === 'FREE' && (
+        {planData.effective_plan.toLowerCase() === 'free' && (
           <TouchableOpacity
             style={styles.upgradeButton}
             onPress={() => Alert.alert(t('planUsage.upgrade'), 'Coming soon!')}
@@ -168,25 +159,31 @@ export default function AISettings() {
 
         {(['base', 'advanced'] as ModelTier[]).map((tier) => {
           const isSelected = model === tier;
+          const isLocked = tier === 'advanced' && planData?.effective_plan.toLowerCase() === 'free';
           return (
             <TouchableOpacity
               key={tier}
-              style={[styles.modelRow, isSelected && styles.modelRowSelected]}
+              style={[styles.modelRow, isSelected && styles.modelRowSelected, isLocked && styles.modelRowLocked]}
               onPress={() => handleModelSelect(tier)}
-              activeOpacity={0.7}
+              activeOpacity={isLocked ? 0.6 : 0.7}
             >
               <View style={styles.modelRowLeft}>
-                <View style={[styles.radioDot, isSelected && styles.radioDotSelected]}>
-                  {isSelected && <View style={styles.radioDotInner} />}
+                <View style={[styles.radioDot, isSelected && styles.radioDotSelected, isLocked && styles.radioDotLocked]}>
+                  {isSelected && !isLocked && <View style={styles.radioDotInner} />}
                 </View>
                 <View style={styles.modelTextWrap}>
-                  <Text style={[styles.modelLabel, isSelected && styles.modelLabelSelected]}>
+                  <Text style={[styles.modelLabel, isSelected && styles.modelLabelSelected, isLocked && styles.modelLabelLocked]}>
                     {t(`aiSettings.model.${tier}.label`)}
                   </Text>
-                  <Text style={styles.modelDesc}>{t(`aiSettings.model.${tier}.desc`)}</Text>
+                  <Text style={[styles.modelDesc, isLocked && styles.modelDescLocked]}>
+                    {t(`aiSettings.model.${tier}.desc`)}
+                  </Text>
                 </View>
               </View>
-              {isSelected && <Ionicons name="checkmark" size={20} color="#000000" />}
+              {isLocked
+                ? <Ionicons name="lock-closed-outline" size={18} color="#bbbbbb" />
+                : isSelected && <Ionicons name="checkmark" size={20} color="#000000" />
+              }
             </TouchableOpacity>
           );
         })}
@@ -344,11 +341,24 @@ const styles = StyleSheet.create({
   modelLabelSelected: {
     fontWeight: '600',
   },
+  modelRowLocked: {
+    backgroundColor: '#fafafa',
+  },
+  radioDotLocked: {
+    borderColor: '#cccccc',
+    backgroundColor: '#f0f0f0',
+  },
+  modelLabelLocked: {
+    color: '#aaaaaa',
+  },
   modelDesc: {
     fontSize: 13,
     color: '#6c757d',
     fontFamily: 'System',
     marginTop: 2,
+  },
+  modelDescLocked: {
+    color: '#cccccc',
   },
 
   // Plan & Usage card

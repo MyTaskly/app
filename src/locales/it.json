@@ -918,12 +918,17 @@
     "upgrade": "Aggiorna piano",
     "loading": "Caricamento piano...",
     "error": "Impossibile caricare le informazioni sul piano. Tocca per riprovare.",
-    "quotaExceeded": "Hai raggiunto il limite mensile di messaggi per il tuo piano {{plan}}. I contatori si resettano il {{date}}.",
-    "voiceQuotaExceeded": "Hai esaurito le richieste vocali mensili per il piano {{plan}}. Puoi continuare a usare la chat testuale.",
+    "dailyMessages": "Messaggi giornalieri",
+    "voiceEnabled": "Attivo",
+    "voiceDisabled": "Non disponibile",
+    "voiceMonthlyLimitTitle": "Limite mensile voce raggiunto",
+    "voiceMonthlyLimitExceeded": "Hai esaurito le richieste vocali mensili. Si azzera il 1° del mese prossimo.",
+    "quotaExceeded": "Hai raggiunto il limite giornaliero di messaggi per il tuo piano {{plan}}. Si azzera a mezzanotte UTC.",
+    "voiceQuotaExceeded": "La chat vocale non è disponibile nel tuo piano. Fai l'upgrade per sbloccarla.",
     "goToPlan": "Vai al piano",
-    "remaining": "{{n}} messaggi rimasti questo mese",
-    "remainingWarning": "Ti restano solo {{n}} messaggi questo mese",
-    "quotaZero": "Limite mensile raggiunto"
+    "remaining": "{{n}} messaggi rimasti oggi",
+    "remainingWarning": "Ti restano solo {{n}} messaggi oggi",
+    "quotaZero": "Limite giornaliero raggiunto"
   },
   "memorySettings": {
     "loading": "Caricamento memorie...",

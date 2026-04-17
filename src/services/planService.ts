@@ -1,24 +1,59 @@
+// MyTaskly API Changes — 2026-04-17
+// GET /auth/me · POST /billing/cancel
+
 import axiosInstance from './axiosInstance';
 
-export interface UserPlan {
-  plan: string;
-  text_messages_limit: number;
-  text_messages_used: number;
-  voice_requests_limit: number;
-  voice_requests_used: number;
-  reset_date: string; // ISO 8601 date, e.g. "2026-05-01"
+export interface UserSubscription {
+  effective_plan: string;
+  status: 'free' | 'active' | 'cancelled' | 'expired';
+  current_period_end: string | null;
+  chat_text_daily_limit: number | null;    // null = unlimited
+  chat_text_monthly_limit: number | null;  // null = unlimited
+  chat_voice_enabled: boolean;
+  chat_voice_daily_limit: number | null;   // null = unlimited (currently always null)
+  chat_voice_monthly_limit: number | null; // null = unlimited
+  ai_model: string;
+  max_categories: number | null;           // null = unlimited
+}
+
+interface AuthMeResponse {
+  id: string;
+  email: string;
+  name: string;
+  subscription: UserSubscription;
+}
+
+// MyTaskly API Changes — 2026-04-16
+// POST /billing/cancel
+
+export interface BillingCancelResponse {
+  effective_plan: string;
+  status: 'cancelled';
+  current_period_end: string;
+}
+
+// Backward-compat alias — use UserSubscription for new code
+export type UserPlan = UserSubscription;
+
+/**
+ * Fetches the current user's subscription info from GET /auth/me.
+ * Auth token is injected automatically by the axios interceptor.
+ */
+export async function getUserPlan(): Promise<UserSubscription> {
+  const response = await axiosInstance.get<AuthMeResponse>('/auth/me');
+  return response.data.subscription;
 }
 
 /**
- * Fetches the current user's plan and monthly usage from GET /auth/me/plan.
- * Auth token is injected automatically by the axios interceptor.
+ * Cancels the active subscription. Access remains until current_period_end.
+ * Throws with 400 if no active subscription exists.
  */
-export async function getUserPlan(): Promise<UserPlan> {
-  const response = await axiosInstance.get<UserPlan>('/auth/me/plan');
+export async function cancelSubscription(): Promise<BillingCancelResponse> {
+  const response = await axiosInstance.post<BillingCancelResponse>('/billing/cancel');
   return response.data;
 }
 
-/** Returns true when the plan should be treated as unlimited (ENTERPRISE). */
-export function isUnlimitedPlan(limit: number): boolean {
-  return limit >= 9999;
+/** Returns true when a limit should be treated as unlimited. */
+export function isUnlimitedPlan(limit: number | null | undefined): boolean {
+  return limit === null || limit === undefined || limit >= 9999;
 }

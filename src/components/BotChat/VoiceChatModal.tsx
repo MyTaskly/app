@@ -243,6 +243,7 @@ const VoiceChatModal: React.FC<VoiceChatModalProps> = ({
     activeTools,
     isMuted,
     isVoiceQuotaExceeded,
+    isVoiceMonthlyLimitReached,
     connect,
     disconnect,
     requestPermissions,
@@ -384,6 +385,31 @@ const VoiceChatModal: React.FC<VoiceChatModalProps> = ({
       );
     }
   }, [isVoiceQuotaExceeded, visible]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Show monthly limit alert when monthly voice quota is exhausted
+  useEffect(() => {
+    if (isVoiceMonthlyLimitReached && visible) {
+      Alert.alert(
+        t('planUsage.voiceMonthlyLimitTitle'),
+        t('planUsage.voiceMonthlyLimitExceeded'),
+        [
+          {
+            text: t('common.buttons.cancel'),
+            style: 'cancel',
+            onPress: handleClose,
+          },
+          {
+            text: t('planUsage.goToPlan'),
+            onPress: () => {
+              handleClose();
+              navigation.navigate('Settings');
+            },
+          },
+        ],
+        { cancelable: false }
+      );
+    }
+  }, [isVoiceMonthlyLimitReached, visible]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Label testo stato
   const getStateLabel = (): string => {

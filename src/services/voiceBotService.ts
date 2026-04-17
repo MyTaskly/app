@@ -122,8 +122,10 @@ export interface VoiceChatCallbacks {
   onAuthenticationFailed?: (error: string) => void;
   onReady?: () => void;
   onDone?: () => void;
-  /** Called when the server closes the connection with code 4029 (voice quota exceeded). */
+  /** Called when the server closes with code 4003 (plan without voice). */
   onVoiceQuotaExceeded?: () => void;
+  /** Called when the server closes with code 4029 (monthly voice quota exhausted). */
+  onVoiceMonthlyLimitReached?: () => void;
 }
 
 /**
@@ -248,10 +250,17 @@ export class VoiceBotWebSocket {
           _vLog(`WS chiuso — code=${event.code} reason="${event.reason}" reconnectAttempts=${this.reconnectAttempts}`);
           this.callbacks.onConnectionClose?.();
 
-          if (event.code === 4029) {
-            // Voice quota exceeded — do not reconnect
-            _vLog('WS chiuso con 4029 — quota vocale esaurita, nessun reconnect');
+          if (event.code === 4003) {
+            // Plan without voice — do not reconnect
+            _vLog('WS chiuso con 4003 — piano senza voce, nessun reconnect');
             this.callbacks.onVoiceQuotaExceeded?.();
+            return;
+          }
+
+          if (event.code === 4029) {
+            // Monthly voice quota exhausted — do not reconnect
+            _vLog('WS chiuso con 4029 — quota mensile vocale esaurita, nessun reconnect');
+            this.callbacks.onVoiceMonthlyLimitReached?.();
             return;
           }
 
@@ -481,10 +490,16 @@ export class VoiceBotWebSocket {
   private handleErrorResponse(response: VoiceErrorResponse): void {
     if (!response.message) return;
 
-    // Check for voice quota exceeded before auth state handling
-    if (response.message.toLowerCase().includes('quota exceeded')) {
-      _vLog('Quota vocale esaurita (error frame)');
-      trackVoiceChatError('voice_quota_exceeded');
+    const msgLower = response.message.toLowerCase();
+    if (msgLower.includes('monthly voice request quota exceeded')) {
+      _vLog('Quota mensile vocale esaurita (error frame)');
+      trackVoiceChatError('voice_monthly_limit_reached');
+      this.callbacks.onVoiceMonthlyLimitReached?.();
+      return;
+    }
+    if (msgLower.includes('not available on your current plan')) {
+      _vLog('Chat vocale non disponibile per il piano (error frame)');
+      trackVoiceChatError('voice_not_available_on_plan');
       this.callbacks.onVoiceQuotaExceeded?.();
       return;
     }

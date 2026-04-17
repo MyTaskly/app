@@ -59,6 +59,7 @@ export function useVoiceChat() {
   const [chunksReceived, setChunksReceived] = useState<number>(0);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [isVoiceQuotaExceeded, setIsVoiceQuotaExceeded] = useState<boolean>(false);
+  const [isVoiceMonthlyLimitReached, setIsVoiceMonthlyLimitReached] = useState<boolean>(false);
 
   // Trascrizioni e tool
   const [transcripts, setTranscripts] = useState<VoiceTranscript[]>([]);
@@ -120,7 +121,8 @@ export function useVoiceChat() {
     onToolOutput:           (...args) => websocketCallbacksRef.current.onToolOutput?.(...args),
     onDone:                 (...args) => websocketCallbacksRef.current.onDone?.(...args),
     onError:                (...args) => websocketCallbacksRef.current.onError?.(...args),
-    onVoiceQuotaExceeded:   () => websocketCallbacksRef.current.onVoiceQuotaExceeded?.(),
+    onVoiceQuotaExceeded:        () => websocketCallbacksRef.current.onVoiceQuotaExceeded?.(),
+    onVoiceMonthlyLimitReached:  () => websocketCallbacksRef.current.onVoiceMonthlyLimitReached?.(),
   }).current;
 
   // Aggiorna il ref ad ogni render con le callback che chiudono su stato/ref correnti
@@ -298,6 +300,12 @@ export function useVoiceChat() {
     onVoiceQuotaExceeded: () => {
       if (!isMountedRef.current) return;
       setIsVoiceQuotaExceeded(true);
+      setState('error');
+    },
+
+    onVoiceMonthlyLimitReached: () => {
+      if (!isMountedRef.current) return;
+      setIsVoiceMonthlyLimitReached(true);
       setState('error');
     },
   };
@@ -661,6 +669,7 @@ export function useVoiceChat() {
     chunksReceived,
     isMuted,
     isVoiceQuotaExceeded,
+    isVoiceMonthlyLimitReached,
 
     // Trascrizioni e tool
     transcripts,

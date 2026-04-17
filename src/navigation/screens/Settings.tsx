@@ -53,31 +53,6 @@ export default function Settings() {
     }
   };
 
-  const formatResetDate = (dateStr: string): string => {
-    try {
-      const date = new Date(dateStr + 'T00:00:00');
-      return date.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
-    } catch {
-      return dateStr;
-    }
-  };
-
-  const renderProgressBar = (used: number, limit: number) => {
-    const fraction = limit > 0 ? Math.min(used / limit, 1) : 0;
-    const isNearLimit = fraction >= 0.8;
-    return (
-      <View style={styles.progressBarTrack}>
-        <View
-          style={[
-            styles.progressBarFill,
-            { width: `${Math.round(fraction * 100)}%` as any },
-            isNearLimit && styles.progressBarWarning,
-          ]}
-        />
-      </View>
-    );
-  };
-
   const renderPlanSection = () => {
     if (planLoading) {
       return (
@@ -96,49 +71,43 @@ export default function Settings() {
       );
     }
 
-    const textUnlimited = isUnlimitedPlan(planData.text_messages_limit);
-    const voiceUnlimited = isUnlimitedPlan(planData.voice_requests_limit);
+    const textUnlimited = isUnlimitedPlan(planData.chat_text_daily_limit);
 
     return (
       <View style={styles.planCard}>
         {/* Plan badge */}
         <View style={styles.planBadgeRow}>
           <View style={styles.planBadge}>
-            <Text style={styles.planBadgeText}>{planData.plan}</Text>
+            <Text style={styles.planBadgeText}>{planData.effective_plan.toUpperCase()}</Text>
           </View>
-          <Text style={styles.resetDateText}>
-            {t('planUsage.resetsOn', { date: formatResetDate(planData.reset_date) })}
-          </Text>
         </View>
 
-        {/* Text messages */}
+        {/* Daily text messages */}
         <View style={styles.usageRow}>
           <View style={styles.usageLabelRow}>
-            <Text style={styles.usageLabel}>{t('planUsage.textMessages')}</Text>
+            <Text style={styles.usageLabel}>{t('planUsage.dailyMessages')}</Text>
             <Text style={styles.usageCount}>
               {textUnlimited
                 ? t('planUsage.unlimited')
-                : `${planData.text_messages_used} / ${planData.text_messages_limit}`}
+                : String(planData.chat_text_daily_limit)}
             </Text>
           </View>
-          {!textUnlimited && renderProgressBar(planData.text_messages_used, planData.text_messages_limit)}
         </View>
 
-        {/* Voice requests */}
+        {/* Voice access */}
         <View style={styles.usageRow}>
           <View style={styles.usageLabelRow}>
             <Text style={styles.usageLabel}>{t('planUsage.voiceRequests')}</Text>
             <Text style={styles.usageCount}>
-              {voiceUnlimited
+              {planData.chat_voice_monthly_limit === null
                 ? t('planUsage.unlimited')
-                : `${planData.voice_requests_used} / ${planData.voice_requests_limit}`}
+                : String(planData.chat_voice_monthly_limit)}
             </Text>
           </View>
-          {!voiceUnlimited && renderProgressBar(planData.voice_requests_used, planData.voice_requests_limit)}
         </View>
 
         {/* Upgrade CTA for FREE */}
-        {planData.plan === 'FREE' && (
+        {planData.effective_plan.toLowerCase() === 'free' && (
           <TouchableOpacity
             style={styles.upgradeButton}
             onPress={() => Alert.alert(t('planUsage.upgrade'), 'Coming soon!')}
