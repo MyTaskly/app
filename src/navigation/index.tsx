@@ -39,6 +39,7 @@ import MemorySettingsScreen from "./screens/MemorySettings";
 import AISettingsScreen from "./screens/AISettings";
 import RecurringTasksScreen from "./screens/RecurringTasksScreen";
 import CalendarScreen from "./screens/Calendar";
+import SubscriptionPlansScreen from "./screens/SubscriptionPlans";
 import NotificationDebugScreen from "./screens/NotificationDebug";
 import BugReportScreen from "./screens/BugReport";
 //import StatisticsScreen from "./screens/Statistics";
@@ -86,6 +87,7 @@ export type RootStackParamList = {
   MemorySettings: undefined;
   AISettings: undefined;
   RecurringTasks: undefined;
+  SubscriptionPlans: undefined;
 };
 
 // Definizione del tipo per le route dei Tab
@@ -519,6 +521,11 @@ function AppStack() {
           name="RecurringTasks"
           component={RecurringTasksScreen}
           options={{ title: 'Task ricorrenti' }}
+        />
+        <Stack.Screen
+          name="SubscriptionPlans"
+          component={SubscriptionPlansScreen}
+          options={{ title: t('navigation.screens.subscriptionPlans') }}
         />
         <Stack.Screen name="NotFound" component={NotFoundScreen} />
       </Stack.Navigator>

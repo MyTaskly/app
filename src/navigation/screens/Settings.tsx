@@ -110,7 +110,7 @@ export default function Settings() {
         {planData.effective_plan.toLowerCase() === 'free' && (
           <TouchableOpacity
             style={styles.upgradeButton}
-            onPress={() => Alert.alert(t('planUsage.upgrade'), 'Coming soon!')}
+            onPress={() => navigation.navigate('SubscriptionPlans')}
           >
             <Text style={styles.upgradeButtonText}>{t('planUsage.upgrade')}</Text>
           </TouchableOpacity>

@@ -967,5 +967,31 @@
       "deleteFailed": "Impossibile eliminare la memoria. Verifica l'ID e riprova.",
       "deleteAllFailed": "Impossibile eliminare tutte le memorie. Riprova più tardi."
     }
+  },
+  "subscriptionPlans": {
+    "description": "Scegli il piano che si adatta alle tue esigenze. Fai l'upgrade quando vuoi da Impostazioni.",
+    "currentPlan": "Piano attuale",
+    "upgradeTo": "Passa a {{plan}}",
+    "unavailable": "Non disponibile",
+    "features": {
+      "chatTextDaily": "Messaggi testuali giornalieri",
+      "chatTextMonthly": "Messaggi testuali mensili",
+      "chatVoiceDaily": "Messaggi vocali giornalieri",
+      "chatVoiceMonthly": "Messaggi vocali mensili",
+      "aiModel": "Modello AI",
+      "maxCategories": "Categorie"
+    },
+    "purchaseSuccess": "Acquisto completato!",
+    "purchaseError": "Acquisto non riuscito. Riprova.",
+    "cancelConfirm": "Annullare abbonamento?",
+    "cancelConfirmMessage": "Il tuo abbonamento rimarrà attivo fino alla fine del periodo di fatturazione corrente.",
+    "cancelSuccess": "Abbonamento annullato con successo",
+    "cancelError": "Impossibile annullare l'abbonamento. Riprova.",
+    "cancelSubscription": "Annulla abbonamento",
+    "gracePeriod": "Il tuo accesso rimane attivo fino al {{date}}",
+    "restoreSuccess": "Acquisti ripristinati con successo!",
+    "restoreError": "Impossibile ripristinare gli acquisti",
+    "noPurchasesFound": "Nessun acquisto da ripristinare",
+    "restorePurchases": "Ripristina acquisti"
   }
 }

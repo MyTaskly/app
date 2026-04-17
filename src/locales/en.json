@@ -967,5 +967,31 @@
       "deleteFailed": "Unable to delete the memory. Check the ID and try again.",
       "deleteAllFailed": "Unable to delete all memories. Please try again."
     }
+  },
+  "subscriptionPlans": {
+    "description": "Choose the plan that fits your needs. Upgrade anytime from Settings.",
+    "currentPlan": "Current plan",
+    "upgradeTo": "Upgrade to {{plan}}",
+    "unavailable": "Unavailable",
+    "features": {
+      "chatTextDaily": "Daily text messages",
+      "chatTextMonthly": "Monthly text messages",
+      "chatVoiceDaily": "Daily voice messages",
+      "chatVoiceMonthly": "Monthly voice messages",
+      "aiModel": "AI model",
+      "maxCategories": "Categories"
+    },
+    "purchaseSuccess": "Purchase successful!",
+    "purchaseError": "Purchase failed. Please try again.",
+    "cancelConfirm": "Cancel subscription?",
+    "cancelConfirmMessage": "Your subscription will remain active until the end of your current billing period.",
+    "cancelSuccess": "Subscription cancelled successfully",
+    "cancelError": "Unable to cancel subscription. Please try again.",
+    "cancelSubscription": "Cancel subscription",
+    "gracePeriod": "Your access remains active until {{date}}",
+    "restoreSuccess": "Purchases restored successfully!",
+    "restoreError": "Unable to restore purchases",
+    "noPurchasesFound": "No purchases found to restore",
+    "restorePurchases": "Restore purchases"
   }
 }
