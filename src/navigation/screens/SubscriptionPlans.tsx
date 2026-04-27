@@ -111,8 +111,8 @@ export default function SubscriptionPlans() {
 
   // Helper to format limit for the new UI feature list
   const formatFeatureLimit = (daily: number | string, monthly: number | string) => {
-    const d = isUnlimitedPlan(daily) ? '∞' : daily;
-    const m = isUnlimitedPlan(monthly) ? '∞' : monthly;
+    const d = isUnlimitedPlan(daily) ? '∞' : String(daily);
+    const m = isUnlimitedPlan(monthly) ? '∞' : String(monthly);
     return `${d} ${t('common.daily', 'giornalieri')} • ${m} ${t('common.monthly', 'mensili')}`;
   };
 
@@ -236,7 +236,7 @@ export default function SubscriptionPlans() {
             icon="folder"
             title={t('subscriptionPlans.featCategoriesTitle', 'Organization')}
             description={t('subscriptionPlans.featCategoriesDesc', 'Organize tasks in up to {{count}} categories', {
-              count: isUnlimitedPlan(selectedPlan.limits.maxCategories) ? 'unlimited' : selectedPlan.limits.maxCategories
+              count: isUnlimitedPlan(selectedPlan.limits.maxCategories) ? 'unlimited' : String(selectedPlan.limits.maxCategories)
             })}
             isLast
           />
