@@ -11,6 +11,9 @@ import { useTutorialContext } from '../../contexts/TutorialContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TUTORIAL_STORAGE_KEY } from '../../constants/tutorialContent';
 import { getUserPlan, isUnlimitedPlan, UserPlan } from '../../services/planService';
+import { STORAGE_KEYS } from '../../constants/authConstants';
+import axiosInstance from '../../services/axiosInstance';
+import { getValidToken } from '../../services/authService';
 
 export default function Settings() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -50,6 +53,29 @@ export default function Settings() {
         t('settings.tutorial.restartErrorMessage'),
         [{ text: t('common.buttons.ok') }]
       );
+    }
+  };
+
+  const handleTestNotification = async () => {
+    try {
+      const token = await getValidToken();
+      const userId = await AsyncStorage.getItem(STORAGE_KEYS.USER_ID);
+      if (!token || !userId) {
+        Alert.alert('Errore', 'Utente non autenticato');
+        return;
+      }
+      const scheduledAt = new Date(Date.now() + 60_000).toISOString();
+      await axiosInstance.post('/notifications/test-notification', {
+        user_id: parseInt(userId, 10),
+        title: 'Test notifica',
+        body: 'Se ricevi questo messaggio, le notifiche funzionano!',
+        scheduled_at: scheduledAt,
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      Alert.alert('Ok', 'Notifica programmata tra 1 minuto');
+    } catch (error: any) {
+      Alert.alert('Errore', error?.response?.data?.detail || 'Invio fallito');
     }
   };
 
@@ -120,9 +146,9 @@ export default function Settings() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['right', 'bottom', 'left']}>
       <StatusBar style="dark" />
-
+      
       <ScrollView style={styles.content}>
         {/* Account Section */}
         <View style={styles.sectionHeader}>
@@ -231,6 +257,17 @@ export default function Settings() {
 
         <TouchableOpacity
           style={styles.menuItem}
+          onPress={handleTestNotification}
+        >
+          <View style={styles.menuItemContent}>
+            <Ionicons name="notifications-outline" size={24} color="#000000" />
+            <Text style={styles.menuItemText}>Test notifica</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#666666" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.menuItem}
           onPress={handleRestartTutorial}
         >
           <View style={styles.menuItemContent}>
@@ -271,7 +308,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingTop: 20,
   },
   menuItem: {
     flexDirection: 'row',
