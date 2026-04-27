@@ -4,6 +4,7 @@ import StorageManager from './StorageManager';
 import { getAllTasks, getCategories } from './taskService';
 import { initializeGoogleSignIn } from './googleSignInService';
 import { checkAndRefreshAuth } from './authService';
+import { registerForPushNotificationsAsync, sendTokenToBackend } from './notificationService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS } from '../constants/authConstants';
 
@@ -95,6 +96,19 @@ class AppInitializer {
             console.error('[APP_INIT] Errore sync offline changes:', error)
           );
         }
+
+        // --- INIZIO: ALLINEAMENTO AUTOMATICO TOKEN NOTIFICHE PUSH ---
+        try {
+          console.log('[APP_INIT] Verifica integrità e sincronizzazione automatica Push Token...');
+          const currentToken = await registerForPushNotificationsAsync();
+          if (currentToken) {
+            await sendTokenToBackend(currentToken, true);
+            console.log('[APP_INIT] ✅ Sync del token notifica completato con successo durante l\'avvio.');
+          }
+        } catch (pushError) {
+          console.error('[APP_INIT] ❌ Errore durante sync automatico token notifiche all\'avvio:', pushError);
+        }
+        // --- FINE: ALLINEAMENTO AUTOMATICO TOKEN NOTIFICHE PUSH ---
       }
 
       // 6. Inizializza pulizie periodiche

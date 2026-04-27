@@ -169,8 +169,7 @@ const AddTask: React.FC<AddTaskProps> = ({
       id: Date.now(),
       title: title.trim(),
       description: description.trim() || "", // Assicurarsi che description non sia mai null
-      end_time: dueDate || null, // Se non c'è una data di scadenza, imposta null
-      start_time: new Date().toISOString(),
+      end_time: dueDate || null,
       priority: priorityString,
       status: "In sospeso", // Aggiornato per coerenza con altri componenti
       category_name: allowCategorySelection

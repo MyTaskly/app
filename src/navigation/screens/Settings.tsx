@@ -268,6 +268,17 @@ export default function Settings() {
 
         <TouchableOpacity
           style={styles.menuItem}
+          onPress={() => navigation.navigate('NotificationDebug')}
+        >
+          <View style={styles.menuItemContent}>
+            <Ionicons name="bug-outline" size={24} color="#000000" />
+            <Text style={styles.menuItemText}>Debug Notifiche</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#666666" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.menuItem}
           onPress={handleRestartTutorial}
         >
           <View style={styles.menuItemContent}>

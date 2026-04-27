@@ -12,17 +12,46 @@ import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { NotificationManager } from '../../components/Debug/NotificationManager';
-import { sendTestNotification, getAllScheduledNotifications } from '../../services/notificationService';
+import { 
+  sendTestNotification, 
+  getAllScheduledNotifications,
+  registerForPushNotificationsAsync,
+  sendTokenToBackend 
+} from '../../services/notificationService';
 import { useTaskNotifications } from '../../services/taskNotificationService';
 
 export default function NotificationDebugScreen() {
   const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
   const [scheduledCount, setScheduledCount] = useState(0);
+  const [expoToken, setExpoToken] = useState<string | null>(null);
   const { scheduleTaskNotification } = useTaskNotifications();
 
   const handleGoBack = () => {
     navigation.goBack();
+  };
+
+  const handleForceTokenSync = async () => {
+    setIsLoading(true);
+    try {
+      const token = await registerForPushNotificationsAsync();
+      if (token) {
+        setExpoToken(token);
+        const success = await sendTokenToBackend(token, true);
+        if (success) {
+          Alert.alert('✅ Successo', 'Token aggiornato e forzato al server Firebase correttamente!');
+        } else {
+          Alert.alert('⚠️ Attenzione', 'Token ottenuto ma non inviato al server. Controlla la connessione.');
+        }
+      } else {
+        Alert.alert('❌ Errore', 'Impossibile ottenere il token da Expo.');
+      }
+    } catch (e) {
+      console.error(e);
+      Alert.alert('❌ Errore', 'Operazione fallita.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSendTestNotification = async () => {
@@ -85,16 +114,8 @@ export default function NotificationDebugScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['right', 'bottom', 'left']}>
       <StatusBar style="dark" />
-      
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
-          <Ionicons name="arrow-back" size={24} color="#000000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>Debug Notifiche</Text>
-      </View>
 
       {/* Content */}
       <ScrollView style={styles.content}>
@@ -120,6 +141,30 @@ export default function NotificationDebugScreen() {
         <View style={styles.testSection}>
           <Text style={styles.sectionTitle}>🧪 Test Rapido</Text>
           
+          <TouchableOpacity 
+            style={[styles.testButton, { backgroundColor: '#FF9800', marginBottom: 10 }, isLoading && styles.testButtonDisabled]} 
+            onPress={handleForceTokenSync}
+            disabled={isLoading}
+          >
+            <Text style={styles.testButtonText}>
+              {isLoading ? '⏳ Caricamento...' : '🔄 Forza rigenerazione & Invio Token a Firebase'}
+            </Text>
+          </TouchableOpacity>
+
+          {expoToken && (
+            <View style={{ backgroundColor: '#f0f0f0', padding: 12, borderRadius: 8, marginBottom: 10 }}>
+              <Text style={{ fontSize: 12, color: '#555', marginBottom: 4 }}>
+                Token Expo (Tieni premuto per selezionare e copiare):
+              </Text>
+              <Text 
+                selectable={true} 
+                style={{ fontSize: 14, fontWeight: 'bold', color: '#000' }}
+              >
+                {expoToken}
+              </Text>
+            </View>
+          )}
+
           <TouchableOpacity 
             style={[styles.testButton, isLoading && styles.testButtonDisabled]} 
             onPress={handleSendTestNotification}

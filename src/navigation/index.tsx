@@ -193,17 +193,17 @@ function NavigationHandler() {
       return false; // Lascia che React Navigation gestisca il back button
     };
 
-    // Listener per sincronizzazione automatica al cambio schermata
+    // Listener per sincronizzazione automatica solo su schermate che ne hanno bisogno
+    const SYNC_SCREEN = ['Categories', 'Calendar20', 'Calendar'];
     const handleScreenChange = async ({ screenName, params }) => {
-      console.log(`[NAVIGATION] 🔄 Cambio schermata rilevato: ${screenName}`);
+      if (!SYNC_SCREEN.includes(screenName)) return;
 
-      // Avvia sincronizzazione asincrona (non bloccante)
       syncAllData()
         .then(({ tasks, categories }) => {
-          console.log(`[NAVIGATION] ✅ Sincronizzazione automatica completata per ${screenName}: ${tasks.length} task, ${categories.length} categorie`);
+          console.log(`[SYNC] Sync completata per ${screenName}: ${tasks.length} task, ${categories.length} categorie`);
         })
         .catch((error) => {
-          console.log(`[NAVIGATION] ⚠️ Sincronizzazione fallita per ${screenName}:`, error.message);
+          console.log(`[SYNC] Fallita per ${screenName}:`, error.message);
         });
     };
 
@@ -228,7 +228,6 @@ function NavigationHandler() {
       if (state) {
         const currentRoute = state.routes[state.index];
         if (currentRoute) {
-          console.log(`[NAVIGATION] 📱 Navigazione verso: ${currentRoute.name}`);
           emitScreenChange(currentRoute.name, currentRoute.params);
           // ── Analytics: traccia navigazione ──
           trackScreenView(currentRoute.name);

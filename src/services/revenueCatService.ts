@@ -40,9 +40,18 @@ class RevenueCatService {
     if (!this.initialized) return null;
     try {
       const offerings = await Purchases.getOfferings();
+      if (offerings.current) {
+        console.log('[RevenueCat] Current offering:', offerings.current.identifier);
+        offerings.current.availablePackages.forEach((pkg) => {
+          console.log(`[RevenueCat] Package "${pkg.identifier}" — ${pkg.product.priceString} (${pkg.product.identifier})`);
+        });
+      } else {
+        console.log('[RevenueCat] No current offering available');
+      }
       return offerings;
     } catch (error) {
-      console.warn('Failed to fetch RevenueCat offerings:', error);
+      // SDK already logs the full error; keep our log at debug level
+      console.debug('RevenueCat offerings unavailable:', error.code);
       return null;
     }
   }

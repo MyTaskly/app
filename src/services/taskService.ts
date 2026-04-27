@@ -352,11 +352,9 @@ export async function getAllTasks(useCache: boolean = true) {
         try {
           // Usa category_id se disponibile, altrimenti fallback su category.name
           const categoryIdentifier = category.category_id || category.id || category.name;
-          console.log(`[getAllTasks] Recuperando task per categoria: "${category.name}" (ID: ${categoryIdentifier})`);
-          const categoryTasks = await getTasks(categoryIdentifier, false); // Non usare cache per singole categorie
+          const categoryTasks = await getTasks(categoryIdentifier, false);
 
           if (Array.isArray(categoryTasks)) {
-            // Correggi i task che hanno category_name/category_id undefined o mancante
             const correctedTasks = categoryTasks.map(task => {
               const needsCategoryIdFix = !task.category_id;
               const needsCategoryNameFix = !task.category_name || task.category_name === 'undefined';
@@ -726,20 +724,11 @@ export async function addTask(task: Task) {
     }
 
     // Assicurati che le date siano nel formato corretto
-    const startTime = task.start_time ? new Date(task.start_time) : new Date();
     const endTime = task.end_time ? new Date(task.end_time) : null;
-
-    // Validazione: end_time deve essere successiva a start_time
-    if (endTime && endTime <= startTime) {
-      console.warn("⚠️ ATTENZIONE: end_time è precedente o uguale a start_time");
-      console.warn("start_time:", startTime.toISOString());
-      console.warn("end_time:", endTime.toISOString());
-    }
 
     const data: any = {
       title: task.title,
       description: task.description || "",
-      start_time: startTime.toISOString(),
       end_time: endTime ? endTime.toISOString() : null,
       priority: task.priority,
       status: task.status || "In sospeso",
