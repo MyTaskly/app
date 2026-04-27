@@ -56,9 +56,15 @@ export const signInWithGoogleServerSide = async () => {
       authorization_url,
       'mytaskly://auth/login',
       {
-        showInRecents: true,
+        showInRecents: false,
       }
     );
+
+    // Force dismiss browser from Android back stack
+    try {
+      await WebBrowser.dismissBrowser();
+      await WebBrowser.coolDownAsync();
+    } catch (_) {}
 
     if (result.type === 'success') {
       console.log('✅ Authorization completed, processing result...');

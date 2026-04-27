@@ -105,7 +105,10 @@ const LoginScreen = () => {
   React.useEffect(() => {
     if (loginSuccess) {
       const timer = setTimeout(() => {
-        navigation.navigate("HomeTabs");
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "HomeTabs" }],
+        });
         setLoginSuccess(false);
       }, 3500);
       return () => clearTimeout(timer);
